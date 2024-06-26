@@ -1,0 +1,7 @@
+app01/templates/
+app01/static/
+app01/utils/pagination.py
+app01/views/index.py
+app01/views/register.py
+app01/views/location.py
+back_end_env/

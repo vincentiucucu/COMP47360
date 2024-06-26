@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VendTune Planning</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .sidebar {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            padding: 48px 0;
+            width: 250px;
+            background-color: #343a40;
+            color: #fff;
+        }
+        .sidebar a {
+            color: #fff;
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+        }
+        .sidebar a:hover {
+            background-color: #495057;
+        }
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        .card {
+            margin-bottom: 20px;
+        }
+        #map {
+            height: 500px;
+            width: 100%;
+        }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY"></script>
+    <script>
+        function initMap() {
+            var locations = [
+                {lat: 40.712776, lng: -74.005974},
+                {lat: 40.758896, lng: -73.985130},
+                {lat: 40.748817, lng: -73.985428},
+                {lat: 40.730610, lng: -73.935242},
+                {lat: 40.706192, lng: -74.009160},
+            ];
+            var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 13,
+                center: locations[0]
+            });
+            for (var i = 0; i < locations.length; i++) {
+                new google.maps.Marker({
+                    position: locations[i],
+                    map: map
+                });
+            }
+        }
+    </script>
+</head>
+<body onload="initMap()">
+    <div class="sidebar">
+        <h2 class="text-center">VendTune</h2>
+        <a href="/overview/">Dashboard</a>
+        <a href="/business/">My Business</a>
+        <a href="/planning/">Planning</a>
+        <a href="/service/">Service</a>
+        <a href="#">Settings</a>
+    </div>
+    <div class="content">
+        <div class="d-flex justify-content-between">
+            <h1>Services</h1>
+        </div>
+        <div class="row">
+            <div class="col-md-7">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Planned Services</h5>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Unit</th>
+                                    <th>Vendor</th>
+                                    <th>Address</th>
+                                    <th>EFT</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for service in planned_services %}
+                                <tr>
+                                    <td>{{ service.date }}</td>
+                                    <td>{{ service.time }}</td>
+                                    <td>{{ service.unit }}</td>
+                                    <td>{{ service.vendor }}</td>
+                                    <td>{{ service.address }}</td>
+                                    <td>${{ service.revenue }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Past Services</h5>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Unit</th>
+                                    <th>Vendor</th>
+                                    <th>Address</th>
+                                    <th>EFT</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for service in past_services %}
+                                <tr>
+                                    <td>{{ service.date }}</td>
+                                    <td>{{ service.time }}</td>
+                                    <td>{{ service.unit }}</td>
+                                    <td>{{ service.vendor }}</td>
+                                    <td>{{ service.address }}</td>
+                                    <td>${{ service.revenue }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Map View</h5>
+                        <div id="map"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
