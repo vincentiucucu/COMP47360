@@ -15,7 +15,7 @@ function Services() {
       <Box sx={{ flexGrow: 1, paddingTop: "60px", paddingLeft:'20px' }}>
 
         {/* Header */}
-        <Box classname="headertitle">
+        <Box className="headertitle">
           <Typography
             sx={{ color: "black", fontSize: "35px", fontWeight: "500" }}
           >

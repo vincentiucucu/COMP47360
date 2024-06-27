@@ -9,7 +9,6 @@ export default function MapBox(){
     height: "100%",
     display: "block",
     borderRadius: "20px",
-    padding: "20px",
     padding: "100px 0px 0px 0px",
   };
 
