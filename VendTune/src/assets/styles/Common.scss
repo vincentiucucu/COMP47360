@@ -1,0 +1,95 @@
+$primary_color_dark: #fa7555;
+$primary_color_light: #fee9c4;
+$secondry_color_light: #e9d8c8;
+
+.Button {
+  position: absolute;
+  z-index: 26;
+  font-weight: 700;
+}
+
+.IntroTextBox {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+}
+
+.BasicTextEntry
+{
+  margin: 0px;
+  margin: 10px 0px;
+  height: 35px;
+  width: 90%;
+  justify-content: center;
+  padding: 0px 10px;
+}
+
+@mixin size($width, $height: $width) {
+  width: $width;
+  height: $height;
+}
+
+@mixin absolute(
+  $top: 0,
+  $right: null,
+  $bottom: null,
+  $left: null,
+  $z-index: null
+) {
+  position: absolute;
+  top: $top;
+  right: $right;
+  bottom: $bottom;
+  left: $left;
+  z-index: $z-index;
+}
+
+.AppLogo {
+  pointer-events: none;
+  display: flex;
+  justify-content: start;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  height: 10vw;
+  width: 10vw;
+  max-height: 100px;
+  max-width: 100px;
+  z-index: 25;
+}
+
+#Background {
+  background-image: url("../Images/StockImages/IntroImage.png");
+  display: flex;
+  justify-content: start;
+  height: 100vh;
+  width: 100vw;
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 24;
+}
+
+.PrimaryDarkBtn {
+  @extend .Button;
+  background-color: $primary_color_dark;
+  border-radius: 10px;
+  padding: 10px 20px;
+  color: #fff;
+}
+
+.PrimaryLightBtn {
+  @extend .Button;
+  background-color: $primary_color_light;
+  border-radius: 10px;
+  padding: 10px 20px;
+  color: black;
+}
+
+.DatePicker {
+  width: 100%;
+}
