@@ -7,13 +7,16 @@ import {
   InputAdornment,
 } from "@mui/material";
 import {
-    DateRange,
-    AccessTime,
-    Business,
-    People,
-    Place,
-  } from "@mui/icons-material";
-  
+  DateRange,
+  AccessTime,
+  Business,
+  People,
+  Place,
+} from "@mui/icons-material";
+
+import Calender from "./Calender";
+import TimePicker from "./Time";
+
 export default function PlanningCard() {
   return (
     <Box
@@ -21,10 +24,9 @@ export default function PlanningCard() {
         position: "absolute",
         top: "75px",
         left: "20px",
-        height: "80vh",
+        height: "auto",
         width: "20vw",
         minWidth: "250px",
-        minHeight: "530px",
         bgcolor: "white",
         borderRadius: "20px",
         p: 3,
@@ -33,47 +35,13 @@ export default function PlanningCard() {
       <Typography variant="h5" sx={{ mb: 2, color: "orangered" }}>
         Plan A Service
       </Typography>
-      <FormControlLabel
-        control={<Checkbox />}
-        label="Autofill with Previous Service Details"
-        sx={{ mb: 2 }}
-      />
-      <TextField
-        fullWidth
-        label="Date"
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <DateRange />
-            </InputAdornment>
-          ),
-        }}
-        sx={{ mb: 2 }}
-      />
-      <TextField
-        fullWidth
-        label="Start Time"
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <AccessTime />
-            </InputAdornment>
-          ),
-        }}
-        sx={{ mb: 2 }}
-      />
-      <TextField
-        fullWidth
-        label="End Time"
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <AccessTime />
-            </InputAdornment>
-          ),
-        }}
-        sx={{ mb: 2 }}
-      />
+
+      <Calender sx={{mb: 5}}/>
+
+      <TimePicker name='Start Time'/>
+
+      <TimePicker name='End Time'/>
+
       <TextField
         fullWidth
         label="Business Unit"

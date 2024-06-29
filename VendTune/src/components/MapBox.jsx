@@ -7,9 +7,10 @@ export default function MapBox(){
   const containerStyle = {
     width: "100%",
     height: "100%",
-    display: "block",
-    borderRadius: "20px",
+    display: "flex",
+    justifyContent:'start',
     padding: "100px 0px 0px 0px",
+    margin: "0px 0px 0px 0px"
   };
 
   const mapStyles = [
@@ -210,6 +211,7 @@ export default function MapBox(){
     <Box
       sx={{
         p: "0px",
+        m:'0px',
         // bgcolor: "yellow",
         display: "flex",
         justifyContent: "center",
@@ -217,8 +219,11 @@ export default function MapBox(){
         width: "100%",
       }}
     >
-      <LoadScript googleMapsApiKey={apiKey}>
+      <LoadScript 
+      sx={{p: "0px",m: '0px'}} 
+      googleMapsApiKey={apiKey}>
         <GoogleMap
+          sx={{p: "0px", m: '0px'}}
           mapContainerStyle={containerStyle}
           center={center}
           zoom={10}
