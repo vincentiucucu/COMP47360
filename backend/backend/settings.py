@@ -48,8 +48,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "app01.middleware.auth.AuthMiddleware"
+    "django.middleware.clickjacking.XFrameOptionsMiddleware"
 
 ]
 
@@ -78,12 +77,6 @@ WSGI_APPLICATION = "backend.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
@@ -92,17 +85,6 @@ DATABASES = {
 #         'PASSWORD': 'your_db_password',
 #         'HOST': 'your_db_host',
 #         'PORT': '5432',
-#     }
-# }
-
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.mysql",
-#         "NAME": "backend",
-#         "USER": "root",
-#         "PASSWORD": "123456",
-#         "HOST": "localhost",
-#         "PORT": 3306,
 #     }
 # }
 
