@@ -11,16 +11,21 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+from dotenv import load_dotenv
+from sshtunnel import SSHTunnelForwarder
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load environment variables
+load_dotenv()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-bygn+ium@gy^u_&*@-a51jmv7z@0_^i6h@zd2rfa$7we!u5_()"
+SECRET_KEY = os.environ.get('DJANGO_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -37,7 +42,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'app01.apps.App01Config',
+    "django.contrib.postgres", # adds recognition for PostgreSQL field types
+    "app01",
 
 ]
 
@@ -77,16 +83,28 @@ WSGI_APPLICATION = "backend.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'your_db_name',
-#         'USER': 'your_db_user',
-#         'PASSWORD': 'your_db_password',
-#         'HOST': 'your_db_host',
-#         'PORT': '5432',
-#     }
-# }
+# Config and start the SSH tunnel
+ssh_tunnel = SSHTunnelForwarder (
+    (os.environ.get('SERVER_IP'), int(os.environ.get('SSH_PORT'))),
+    ssh_username=os.environ.get('SSH_USERNAME'),
+    ssh_password=os.environ.get('SSH_PWD'),
+    remote_bind_address=('localhost', int(os.environ.get('LOCAL_DB_PORT_ON_SERVER'))),
+)
+ssh_tunnel.start()
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PWD'),
+        'HOST': 'localhost',
+        'PORT': ssh_tunnel.local_bind_port,
+        'OPTIONS': {
+            'options': '-c search_path=vendtune' # if no schema is specified, always search in vendtune schema
+        }
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
