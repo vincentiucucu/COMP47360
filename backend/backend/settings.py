@@ -43,8 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.postgres", # adds recognition for PostgreSQL field types
-    "app01",
-
+    "app01.apps.App01Config"
 ]
 
 MIDDLEWARE = [
