@@ -1,4 +1,4 @@
-from django.db import models
+from django.contrib.gis.db import models
 
 class Business(models.Model):
     business_id = models.AutoField(primary_key=True)
@@ -46,8 +46,8 @@ class Service(models.Model):
     service_date = models.DateField()
     service_start_time = models.TimeField()
     service_end_time = models.TimeField()
-    location_lat = models.FloatField()
-    location_lng = models.FloatField()
+    location_coords = models.PointField()
+    location_address = models.CharField()
     revenue = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
 
