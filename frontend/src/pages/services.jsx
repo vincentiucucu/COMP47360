@@ -1,5 +1,5 @@
 import { Button, Box, Typography, Grid } from "@mui/material";
-import "../assets/styles/SignIn.scss";
+import "../styles/SignIn.scss";
 import AppBar from "../components/AppBarLayout";
 import Map from "../components/MapBox";
 import DataGrid from "../components/DataGrid";

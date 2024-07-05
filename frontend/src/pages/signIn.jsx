@@ -1,4 +1,4 @@
-import "../assets/styles/SignIn.scss";
+import "../styles/SignIn.scss";
 import Background from "../components/Background";
 import Signup from "../components/Signup";
 
