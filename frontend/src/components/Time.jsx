@@ -4,7 +4,7 @@ import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { TextField, Box } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import "../assets/styles/Common.scss";
+import "../styles/Common.scss";
 
 const Time = (props) => {
   const [selectedTime, setSelectedTime] = React.useState(dayjs());

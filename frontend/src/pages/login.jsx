@@ -1,4 +1,4 @@
-import '../assets/styles/Login.scss'
+import "../styles/Login.scss";
 import Background from "../components/Background";
 import IntroText from "../components/IntroText";
 import LoginBox from '../components/LoginBox'

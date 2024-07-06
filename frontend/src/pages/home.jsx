@@ -1,5 +1,5 @@
 import IntroText from "../components/IntroText";
-import "../assets/styles/Main.scss";
+import "../styles/Main.scss";
 import Background from "../components/Background"
 import { useNavigate } from 'react-router-dom';
 import Button from "../components/Button";
