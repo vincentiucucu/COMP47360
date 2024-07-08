@@ -1,12 +1,56 @@
 from django.contrib.gis.db import models
+from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 
-class Business(models.Model):
+# manager for custom user model Business
+class BusinessManager(BaseUserManager):
+    
+    def create_user(self, business_email, business_name, password=None):
+        if not business_email:
+            raise ValueError("An email must be provided.")
+        if not business_name:
+            raise ValueError("A business name must be provided.")
+        
+        business = self.model(
+            business_email = self.normalize_email(business_email),
+            business_name = business_name
+        )
+        business.set_password(password)
+        business.save()
+
+        return business
+
+
+    def create_superuser(self, business_email, business_name, password=None):
+        business = self.create_user(
+            business_email = self.normalize_email(business_email),
+            business_name = business_name,
+            password=password
+        )
+
+        business.is_superuser = True
+        business.is_admin = True
+        business.is_staff = True
+        business.save()
+
+        return business
+
+# custom user model replacing base User model
+class Business(AbstractBaseUser):
     business_id = models.AutoField(primary_key=True)
     business_name = models.CharField(unique=True)
-    password_hash = models.CharField(max_length=64)
+    password = models.CharField()
     business_email = models.CharField(unique=True, max_length=254)
-    created_at = models.DateTimeField(blank=True, null=True)
+    created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     modified_at = models.DateTimeField(blank=True, null=True)
+    last_login = models.DateTimeField(auto_now=True) 
+    is_admin = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+
+    USERNAME_FIELD = "business_email"
+    REQUIRED_FIELDS = ["business_name"]
+    objects = BusinessManager()
 
     class Meta:
         db_table = 'businesses'
