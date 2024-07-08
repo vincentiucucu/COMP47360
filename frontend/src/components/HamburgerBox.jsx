@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import Box from "@mui/material/Box";
-import AppBarBox from './AppBarBox'
+import AppBarBox from './AppBarGrid'
 import SideDrawer from './SideDrawer'
 
-export default function AppBarLayout() {
-
-
+export default function HamburgerBox() {
+  
   const [isDrawerOpen, setDrawerOpen] = useState(false);
 
   const toggleDrawer = (open) => (event) => {

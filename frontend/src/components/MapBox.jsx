@@ -1,8 +1,10 @@
 import { Box } from "@mui/material";
-import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
+import { GoogleMap, LoadScript, HeatmapLayer } from "@react-google-maps/api";
+import React, { useState, useCallback } from 'react';
 
 export default function MapBox(){
-  const apiKey = "AIzaSyA1hSQzEfUsuFhz1JmBU2CZwYqQesQDkro";
+
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
   const containerStyle = {
     width: "100%",
@@ -12,7 +14,7 @@ export default function MapBox(){
     padding: "100px 0px 0px 0px",
     margin: "0px 0px 0px 0px"
   };
-
+ 
   const mapStyles = [
     {
       elementType: "geometry",
@@ -207,6 +209,30 @@ export default function MapBox(){
     lng: -73.9712,
   };
 
+  const [heatmapData, setHeatmapData] = useState([]);
+  const [mapInstance, setMapInstance] = useState(null);
+
+  const heatmapOptions = {
+    radius: 50, // Adjust this value to increase/decrease the size of the heatmap points
+    opacity: 0.6 // Adjust the opacity if needed
+  };
+
+  const onLoad = useCallback((map) => {
+    const google = window.google;
+    const data = [
+      { location: new google.maps.LatLng(40.7831, -73.9712), weight: 40 },
+      { location: new google.maps.LatLng(40.7831, -73.9500), weight: 40 },
+      { location: new google.maps.LatLng(40.7841, -73.9702), weight: 50 },
+      { location: new google.maps.LatLng(40.7900, -73.9722), weight: 90 },
+      { location: new google.maps.LatLng(40.8000, -73.9722), weight: 85 },
+      { location: new google.maps.LatLng(40.7500, -73.9722), weight: 85 },
+      { location: new google.maps.LatLng(40.7500, -73.9800), weight: 85 },
+      { location: new google.maps.LatLng(40.7650, -73.9800), weight: 85 },
+    ];
+    setHeatmapData(data);
+    setMapInstance(map);
+  }, []);
+
   return (
     <Box
       sx={{
@@ -219,19 +245,22 @@ export default function MapBox(){
         width: "100%",
       }}
     >
-      <LoadScript 
-      sx={{p: "0px",m: '0px'}} 
-      googleMapsApiKey={apiKey}>
-        <GoogleMap
-          sx={{p: "0px", m: '0px'}}
-          mapContainerStyle={containerStyle}
-          center={center}
-          zoom={10}
-          options={options}
-        >
-          <Marker position={center} />
-        </GoogleMap>
-      </LoadScript>
+       <LoadScript
+      googleMapsApiKey={apiKey}
+      libraries={['visualization']}
+      sx={{ p: "0px", m: '0px' }}
+    >
+      <GoogleMap
+        sx={{ p: "0px", m: '0px' }}
+        mapContainerStyle={containerStyle}
+        center={center}
+        zoom={13}
+        options={options}
+        onLoad={onLoad}
+      >
+        {heatmapData.length > 0 && <HeatmapLayer data={heatmapData} options={heatmapOptions} />}
+      </GoogleMap>
+    </LoadScript>
     </Box>
   );
 };

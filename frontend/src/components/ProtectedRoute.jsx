@@ -1,7 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import api from "../api";
-import { RFRESH_TOKEN, ACCESS_TOKEN } from "../constants";
+import { REFRESH_TOKEN, ACCESS_TOKEN } from "../constants";
 import { useState, useEffect } from "react";
 
 export default function ProtectedRoute({ children }) {
@@ -12,7 +12,7 @@ export default function ProtectedRoute({ children }) {
   }, [])
 
   const refreshToken = async () => {
-    const refreshToken = localStorage.getItem(RFRESH_TOKEN);
+    const refreshToken = localStorage.getItem(REFRESH_TOKEN);
     try {
       const res = await api.post("/api/token/refresh/", {
         refresh: refreshToken,
