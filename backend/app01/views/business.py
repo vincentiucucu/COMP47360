@@ -2,7 +2,7 @@
 from rest_framework.response import Response
 
 from app01.models import Business
-from app01.serializer import SignUpSerializer,LoginSerializer,LogoutSerializer
+from app01.serializer import BusinessSerializer,LoginSerializer,LogoutSerializer
 from rest_framework.generics import GenericAPIView,CreateAPIView
 from django.http import JsonResponse
 from rest_framework.permissions import AllowAny
@@ -14,7 +14,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 class SignUp(CreateAPIView):
-    serializer_class = SignUpSerializer
+    serializer_class = BusinessSerializer
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
