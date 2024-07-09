@@ -12,3 +12,19 @@ class BusinessSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         return Business.objects.create_user(**validated_data)
+
+
+class LoginSerializer(serializers.Serializer):
+    business_name = serializers.CharField()
+    password = serializers.CharField()
+
+    def validate(self, attrs):
+        business_name = attrs.get('business_name')
+        password = attrs.get('password')
+
+        return attrs
+
+
+
+class LogoutSerializer(serializers.Serializer):
+    refresh = serializers.CharField()
