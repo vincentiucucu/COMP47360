@@ -4,7 +4,7 @@ from app01.serializer import BusinessUnitSerializer
 from app01.views.auth import MyAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
-# from app01.views.authentication import CustomJWTAuthentication
+
 class BusinessUnitView(ModelViewSet):
     authentication_classes = [JWTAuthentication]
 
