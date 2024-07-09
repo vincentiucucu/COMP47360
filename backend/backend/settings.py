@@ -64,7 +64,9 @@ INSTALLED_APPS = [
     "django.contrib.gis",
     "app01.apps.App01Config",
     "rest_framework",
-    "corsheaders"
+    "corsheaders",
+    "rest_framework_simplejwt",
+    'rest_framework_simplejwt.token_blacklist'
 ]
 
 MIDDLEWARE = [
@@ -169,3 +171,29 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+
+AUTH_USER_MODEL = 'app01.Business'
+
+from datetime import timedelta
+#
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'VERIFYING_KEY': None,
+    'AUDIENCE': None,
+    'ISSUER': None,
+
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'USER_ID_FIELD': 'business_email',
+    'USER_ID_CLAIM': 'user_email',
+
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+
+    'JTI_CLAIM': 'jti',
+}
