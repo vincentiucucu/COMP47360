@@ -34,5 +34,5 @@ urlpatterns = [
     path("login/refresh/", TokenRefreshView.as_view(), name="refresh_token"),
     path("api-auth", include("rest_framework.urls")),
 
-    path("", include(router.urls)),
+    path("api", include(router.urls)),
 ]
