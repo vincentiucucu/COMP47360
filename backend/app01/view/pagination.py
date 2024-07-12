@@ -23,6 +23,7 @@ class Pagination(PageNumberPagination):
             'page_size': self.page_size,
             'results': data
         })
+    
     '''
     links:
 
@@ -42,8 +43,9 @@ class Pagination(PageNumberPagination):
     
     current_page:
     
-     Return the current page number.
+    Return the current page number.
     Value: self.page.number, which indicates the page number of the current request.
+    
     page_size:
     
     Return the number of records per page.
@@ -51,6 +53,6 @@ class Pagination(PageNumberPagination):
     
     results:
     
-     Contains the actual data record of the current page.
+    Return the actual data record of the current page.
     Value: data, which is the serialized data passed to the get_paginated_response method.
     '''
