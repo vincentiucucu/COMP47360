@@ -14,16 +14,16 @@ class BusinessUnitFilter(django_filters.FilterSet):
         model = BusinessUnit
         fields = ['unit_name', 'permit_id', 'permit_expiry_date', 'unit_type']
 '''
-GET /api/business_unit/?unit_name=Central
+GET /api/businessUnit/?unit_name=Central
 unit_name: Filters by name containing "Central".
 
-GET /api/business_unit/?permit_id=ABC123
+GET /api/businessUnit/?permit_id=ABC123
 permit_id: Filters by license ID exactly matching "ABC123".
 
-GET /api/business_unit/?permit_expiry_date_after=2023-01-01&permit_expiry_date_before=2023-12-31
+GET /api/businessUnit/?permit_expiry_date_after=2023-01-01&permit_expiry_date_before=2023-12-31
 permit_expiry_date_after and permit_expiry_date_before: Filters by permit_expiry_date from 2023-01-01 to 2023-12-31.
 
-GET /api/business_unit/?unit_type=Retail
+GET /api/businessUnit/?unit_type=Retail
 unit_type: Filters by unit type containing "Retail".
 
 '''
