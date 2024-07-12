@@ -16,7 +16,7 @@ class VendorView(ModelViewSet):
     filter_backends = [DjangoFilterBackend, OrderingFilter,SearchFilter]
     filterset_class = VendorFilter
 
-    search_fields = ['^vendor_name', '=licence_id', '@vendor_email', 'vendor_phone_number']
+    search_fields = ['^vendor_name', '=licence_id', 'vendor_email', 'vendor_phone_number']
     # GET /api/vendor /?search = John
     '''
     search John in the all fields in search_fields
