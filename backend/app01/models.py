@@ -108,6 +108,54 @@ class ServiceVendor(models.Model):
     class Meta:
         db_table = 'service_vendors'
 
+class ZonedStreet(models.Model):
+    zoned_street_id = models.AutoField(primary_key=True)
+    street_address = models.CharField()
+    street_geometry = models.MultiLineStringField()
+    street_centroid = models.PointField()
+    zone_id = models.IntegerField()
+    zone_name = models.CharField()
+    zone_geometry = models.MultiPolygonField()
+
+    class Meta:
+        db_table = 'zoned_streets'
+
+
+class Restriction(models.Model):
+    restriction_id = models.CharField(primary_key=True) # mapped to UNIQID in source data
+    restriction_street = models.CharField()
+    restriction_fstreet = models.CharField()
+    restriction_tstreet = models.CharField()
+    restriction_street_geometry = models.MultiLineStringField()
+    restriction_weekday = models.IntegerField()
+    restriction_ftime = models.DateTimeField()
+    restriction_ttime = models.DateTimeField()
+
+    class Meta:
+        db_table = 'restrictions'
+
+
+class BusynessScore(models.Model):
+    score = models.FloatField()
+    zone = models.IntegerField()
+    hour = models.DateTimeField()
+    centroid = models.PointField(srid=4326)
+    zone_busyness_id = models.AutoField(primary_key=True)
+
+    class Meta:
+        db_table = 'busyness_score'
+
+
+class Event(models.Model):
+    event_name = models.CharField(blank=True, null=True)
+    start = models.DateTimeField()
+    end = models.DateTimeField()
+    location = models.PointField(srid=4326)
+    event_id = models.IntegerField(primary_key=True)
+
+    class Meta:
+        db_table = 'events'
+
 
 class Log(models.Model):
     log_id = models.AutoField(primary_key=True)
