@@ -42,7 +42,13 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
 }
+
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
@@ -64,7 +70,8 @@ INSTALLED_APPS = [
     "django.contrib.gis",
     "app01.apps.App01Config",
     "rest_framework",
-    "corsheaders"
+    "corsheaders",
+    'django_filters'
 ]
 
 MIDDLEWARE = [
