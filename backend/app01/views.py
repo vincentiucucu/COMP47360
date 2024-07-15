@@ -62,14 +62,14 @@ def get_recommendations_view(request):
             except ValueError:
                 return HttpResponseBadRequest('Invalid datetime format. Use "%Y-%m-%d %H:%M:%S".')
 
-            # Get busyness info from frontend
-            busy_score_data_json = request.GET.get('busy_score_data')
-            if not busy_score_data_json:
-                return HttpResponseBadRequest('Busy score data must be provided.')
-            busy_score_data = pd.read_json(busy_score_data_json)
+            # # Get busyness info from frontend
+            # busy_score_data_json = request.GET.get('busy_score_data')
+            # if not busy_score_data_json:
+            #     return HttpResponseBadRequest('Busy score data must be provided.')
+            # busy_score_data = pd.read_json(busy_score_data_json)
 
             # Generate recommendations
-            recommendations = get_recommendations(busy_score_data, events_df, user_zone, user_datetime)
+            recommendations = get_recommendations(events_df, user_zone, user_datetime)
 
             return JsonResponse(recommendations.to_dict(orient='records'), safe=False)
 

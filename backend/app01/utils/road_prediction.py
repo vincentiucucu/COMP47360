@@ -4,9 +4,10 @@ from shapely import wkb, wkt
 import pandas as pd
 import geopandas as gpd
 from django.conf import settings
+import os
 
 def connect_to_postgres(query):
-    
+
     start_time = time.time()
     conn = None
     try:
@@ -59,6 +60,8 @@ def connect_to_postgres(query):
     print(f'connect_to_postgres took {time.time() - start_time} seconds to complete')
 
 def find_closest_rows(df, target_datetime):
+    print(5)
+
     df['hour'] = pd.to_datetime(df['hour'])
     df['time_diff'] = abs(df['hour'] - target_datetime)
     df_sorted = df.sort_values(by=['zone', 'time_diff'])
@@ -68,11 +71,15 @@ def find_closest_rows(df, target_datetime):
     return closest_rows
 
 def calculate_distance(geometry, closest_rows):
+    
+
     x = [(geometry.distance(i)) ** 2 for i in closest_rows['centroid']]
     y = closest_rows['score']
     return sum(y / x)
 
 def estimate_busyness(query, target_datetime):
+    print(query)
+    print(1)
     start_time = time.time()
 
     df = connect_to_postgres(query)
@@ -80,11 +87,14 @@ def estimate_busyness(query, target_datetime):
 
     closest_rows = find_closest_rows(df, target_datetime)
 
-    df2 = pd.read_csv('dataset/MHTN_zoned_streets.csv')
+    csv_path = os.path.join(os.path.dirname(__file__), 'dataset', 'MHTN_zoned_streets.csv')
+
+    df2 = pd.read_csv(csv_path)
+
     df2 = df2.drop(columns=['address', 'zone_name', 'zone_geometry', 'zone_id'])
     df2['street_centroid'] = df2['street_centroid'].apply(wkt.loads)
     gdf = gpd.GeoDataFrame(df2, geometry='street_centroid')
     gdf['Score'] = gdf['street_centroid'].apply(calculate_distance, closest_rows=closest_rows) / 10 ** 5
     print(time.time() - start_time)
-
-    return gdf[['Latitude', 'Longitude', 'Score']]
+    print(gdf)
+    return gdf[['street_geometry','street_centroid', 'Score']]
