@@ -10,9 +10,11 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 import Home from "./pages/home";
 import LogIn from "./pages/login";
-import SignIn from "./pages/signIn";
+import Register from "./pages/register";
 import Services from "./pages/services";
 import Planning from "./pages/planning";
+import Business from "./pages/business";
+import Dashboard from "./pages/dashboard";
 import NotFound from "./pages/notFound";
 
 function logout() {
@@ -38,9 +40,11 @@ function App() {
           }
         />
         <Route path="/login" element={<LogIn />} />
-        <Route path="/signin" element={<SignIn />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/services" element={<Services />} />
         <Route path="/planning" element={<Planning />} />
+        <Route path="/business" element={<Business />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="*" element={<NotFound/>} />
       </Routes>
     </BrowserRouter>

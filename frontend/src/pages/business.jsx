@@ -4,18 +4,40 @@ import Map from "../components/MapBox";
 import DataGrid from "../components/DataGrid";
 import { useNavigate } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
-import Papa from 'papaparse';
+import StorefrontIcon from "@mui/icons-material/Storefront";
+import GroupIcon from "@mui/icons-material/Group";
 import { useState, useEffect } from "react";
-
-// import getPastServices from "../services/getPastServices"
-// import getPlannedServices from "../services/getPlannedServices"
+import ImageCardBox from "../components/Card";
 
 function createData(id, date, time, unit, vendor, address, EFT) {
   return { id, date, time, unit, vendor, address, EFT };
 }
 
-function Services() {
-  
+// const getColWidth = () => {
+//   const screenWidth = window.innerWidth;
+//   return {
+//     id: 0.05 * screenWidth,
+//     date: 0.15 * screenWidth,
+//     time: 0.1 * screenWidth,
+//     unit: 0.05 * screenWidth,
+//     vendor: 0.1 * screenWidth,
+//     address: 0.3 * screenWidth,
+//     eft: 0.1 * screenWidth,
+//   };
+// }
+
+export default function Business() {
+  // const [colwidth, setColWidth] = useState(getColWidth());
+
+  // useEffect(() => {
+  //     const handleResize = () => {
+  //         setColWidth(getColWidth());
+  //     };
+
+  //     window.addEventListener('resize', handleResize);
+  //     return () => window.removeEventListener('resize', handleResize);
+  //   }, []);
+
   const buttonStyles = {
     textTransform: "none",
     backgroundColor: "#F6F6F6",
@@ -24,11 +46,6 @@ function Services() {
     marginRight: "8px",
     color: "black",
     borderColor: "transparent",
-    "&:hover": {
-      borderColor: "black",
-      borderWidth: "2px",
-      borderStyle: "solid",
-    },
   };
 
   const rows = [
@@ -128,6 +145,46 @@ function Services() {
     },
   ];
 
+  //   const columns = [
+  //     { field: "id", headerName: "ID", width: colwidth.id },
+  //     {
+  //       field: "date",
+  //       headerName: "Date",
+  //       width: colwidth.date,
+  //       editable: true,
+  //     },
+  //     {
+  //       field: "time",
+  //       headerName: "Time",
+  //       width: colwidth.time,
+  //       editable: true,
+  //     },
+  //     {
+  //       field: "unit",
+  //       headerName: "Unit",
+  //       width: colwidth.unit,
+  //       editable: true,
+  //     },
+  //     {
+  //       field: "vendor",
+  //       headerName: "Vendor",
+  //       width: colwidth.vendor,
+  //       editable: true,
+  //     },
+  //     {
+  //       field: "address",
+  //       headerName: "Address",
+  //       width: colwidth.address,
+  //       editable: true,
+  //     },
+  //     {
+  //       field: "EFT",
+  //       headerName: "EFT",
+  //       width: colwidth.eft,
+  //       editable: true,
+  //     },
+  //   ];
+
   const navigate = useNavigate();
 
   const handleAddClick = () => {
@@ -137,7 +194,7 @@ function Services() {
   return (
     <Box sx={{ display: "grid", gridTemplateRows: "auto 1fr" }}>
       {/* App Bar */}
-      <AppBar />
+      <AppBar></AppBar>
 
       {/* Layout */}
       <Box
@@ -148,19 +205,42 @@ function Services() {
           <Typography
             sx={{ color: "black", fontSize: "35px", fontWeight: "500" }}
           >
-            Services
+            My Business
           </Typography>
         </Box>
 
+        <Box>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6} lg={3}>
+              <ImageCardBox
+                Image={<StorefrontIcon style={{ color: "#f56c42" }} />}
+                Title="Number of Business Units"
+                Count="4"
+              ></ImageCardBox>
+            </Grid>
+            <Grid item xs={12} sm={6} lg={3}>
+              <ImageCardBox
+                Image={<GroupIcon style={{ color: "#f56c42" }} />}
+                Title="Number of Vendors"
+                Count="6"
+              ></ImageCardBox>
+            </Grid>
+          </Grid>
+        </Box>
         <Grid
           container
           spacing={2}
-          sx={{ height: "100%", paddingBottom: "30px" }}
+          sx={{
+            height: "100%",
+            width: { sm: "100%", lg: "70%" },
+            paddingBottom: "30px",
+          }}
         >
           {/* Planned Services */}
-          <Grid item xs={12} sm={12} md={12} lg={8} xl={8}>
+          <Grid item xs={12}>
             <Box
               sx={{
+                // bgcolor: "red",
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "start",
@@ -184,9 +264,11 @@ function Services() {
                     alignContent: "center",
                   }}
                 >
-                  Planned Services
+                  Business Units
                 </Typography>
+                {/* <ButtonBox></ButtonBox> */}
                 <Button
+                  variant="outlined"
                   startIcon={<AddIcon />}
                   sx={buttonStyles}
                   onClick={handleAddClick}
@@ -200,16 +282,10 @@ function Services() {
                   width: { xs: "90vw", sm: "95vw", md: "100%" },
                 }}
               >
-                <Box sx={{ minWidth: 750 }}>
-                  <DataGrid rows={rows} columns={columns} />
-                </Box>
+                {" "}
+                <DataGrid rows={rows} columns={columns}></DataGrid>
               </Box>
             </Box>
-          </Grid>
-
-          {/* Map */}
-          <Grid item xs={12} sm={12} md={12} lg={4} xl={4}>
-            <Map />
           </Grid>
 
           {/* Past Services */}
@@ -219,13 +295,10 @@ function Services() {
             }}
             item
             xs={12}
-            sm={12}
-            md={12}
-            lg={8}
-            xl={8}
           >
             <Box
               sx={{
+                // bgcolor: "red",
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "start",
@@ -249,8 +322,16 @@ function Services() {
                     alignContent: "center",
                   }}
                 >
-                  Past Services
+                  Authorised Vendors
                 </Typography>
+                <Button
+                  variant="outlined"
+                  startIcon={<AddIcon />}
+                  sx={buttonStyles}
+                  onClick={handleAddClick}
+                >
+                  Add
+                </Button>
               </Box>
               <Box
                 sx={{
@@ -258,9 +339,8 @@ function Services() {
                   width: { xs: "90vw", sm: "95vw", md: "100%" },
                 }}
               >
-                <Box sx={{ minWidth: 750 }}>
-                  <DataGrid rows={rows} columns={columns} />
-                </Box>
+                {" "}
+                <DataGrid rows={rows} columns={columns}></DataGrid>
               </Box>
             </Box>
           </Grid>
@@ -269,5 +349,3 @@ function Services() {
     </Box>
   );
 }
-
-export default Services;

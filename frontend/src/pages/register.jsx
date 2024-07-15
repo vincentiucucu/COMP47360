@@ -3,8 +3,6 @@ import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
@@ -12,6 +10,8 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { useNavigate } from 'react-router-dom';
+// import { register } from '../services/registerApiService';
 
 function Copyright(props) {
   return (
@@ -28,14 +28,33 @@ function Copyright(props) {
 
 const defaultTheme = createTheme();
 
-export default function SignIn() {
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+export default function Register() {
+  const [businessName, setBusinessName] = React.useState("");
+  const [businessEmail, setBusinessEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    // setLoading(true);
+    // e.preventDefault();
+    // const data = new FormData(e.currentTarget);
+    // setBusinessName(data.get("businessName"));
+    // setBusinessEmail(data.get("email"))
+    // setPassword(data.get("newPassword"));
+
+    // try {
+    //   const res = await register(businessName, businessEmail, password);
+    //   if (res.status >= 200 && res.status < 300) {
+    //     navigate("/services");
+    //   } else {
+    //     navigate("/login");
+    //   }
+    // } catch (error) {
+    //   alert(error);
+    // } finally {
+    //   setLoading(false);
+    // }
   };
 
   return (
@@ -54,29 +73,19 @@ export default function SignIn() {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Sign up
+            Register
           </Typography>
           <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12}>
                 <TextField
                   autoComplete="given-name"
-                  name="firstName"
+                  name="businessName"
                   required
                   fullWidth
-                  id="firstName"
-                  label="First Name"
+                  id="businessName"
+                  label="Business Name"
                   autoFocus
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  fullWidth
-                  id="lastName"
-                  label="Last Name"
-                  name="lastName"
-                  autoComplete="family-name"
                 />
               </Grid>
               <Grid item xs={12}>
@@ -84,7 +93,7 @@ export default function SignIn() {
                   required
                   fullWidth
                   id="email"
-                  label="Email Address"
+                  label="Business Email Address"
                   name="email"
                   autoComplete="email"
                 />
@@ -93,17 +102,22 @@ export default function SignIn() {
                 <TextField
                   required
                   fullWidth
-                  name="password"
+                  name="new-password"
                   label="Password"
                   type="password"
-                  id="password"
+                  id="newPassword"
                   autoComplete="new-password"
                 />
               </Grid>
               <Grid item xs={12}>
-                <FormControlLabel
-                  control={<Checkbox value="allowExtraEmails" color="primary" />}
-                  label="I want to receive inspiration, marketing promotions and updates via email."
+                <TextField
+                  required
+                  fullWidth
+                  name="confirm-password"
+                  label="Confirm Password"
+                  type="password"
+                  id="confirmPassword"
+                  autoComplete="new-password"
                 />
               </Grid>
             </Grid>

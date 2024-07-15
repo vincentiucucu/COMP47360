@@ -4,7 +4,7 @@ import { DataGrid } from '@mui/x-data-grid';
 
 export default function DataGridDemo({rows, columns}) {
   return (
-    <Box sx={{ height: 'auto', width: '100%' }}>
+    <Box sx={{ height: 'auto', width: 'auto' }}>
       <DataGrid
         rows={rows}
         columns={columns}
@@ -15,7 +15,7 @@ export default function DataGridDemo({rows, columns}) {
             },
           },
         }}
-        pageSizeOptions={[6]}
+        pageSizeOptions={[2]}
         checkboxSelection
         disableRowSelectionOnClick
         autoHeight
