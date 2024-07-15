@@ -1,8 +1,5 @@
-import IntroText from "../components/IntroText";
-import "../styles/Main.scss";
-import Background from "../components/Background"
 import { useNavigate } from 'react-router-dom';
-import Button from "../components/Button";
+import { Box } from "@mui/material"
 
 function Main() {
 
@@ -17,19 +14,9 @@ function Main() {
     };
 
   return (
-    <div>
-      <Background></Background>
-      <div>
-        <div id="UserBtn">
-          <Button className='LogInBtn' btnName='Login' onClick={handleLoginClick}></Button>
-          <Button className='SignInBtn' btnName='SignIn' onClick={handleSignInClick}></Button>
-        </div>
-        <div id="IntroTextBox">
-          <div className="BlurCard"></div>
-          <IntroText></IntroText>
-        </div>
-      </div>
-    </div>
+    <Box>
+
+    </Box>
   );
 }
 

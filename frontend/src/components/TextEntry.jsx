@@ -5,7 +5,6 @@ const BasicTextEntry = (props) => {
         className='BasicTextEntry'
         type={props.type}
         placeholder={props.placeholder}
-        // value={foodTruckName}
       />
     </div>
   );

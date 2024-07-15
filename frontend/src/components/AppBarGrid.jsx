@@ -10,7 +10,7 @@ import profile from "../assets/Images/Logo/Profile.png";
 import SideDrawer from "./SideDrawer";
 import { useMediaQuery, useTheme } from "@mui/material";
 
-export default function AppBarBox({ toggleDrawer }) {
+export default function AppBarGrid({ toggleDrawer }) {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   return (
@@ -22,6 +22,7 @@ export default function AppBarBox({ toggleDrawer }) {
             gridTemplateColumns: "0.1fr 9.9fr auto",
             height: { xs: "65px", sm: "65px", md: "40px", lg: "40px" },
             bgcolor: "#2E2E2E",
+            position:"static"
           }}
         >
           <IconButton
