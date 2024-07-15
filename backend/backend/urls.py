@@ -25,4 +25,4 @@ urlpatterns = [
     path('docs/', include_docs_urls(title='Drf api', description='xxx',permission_classes=[AllowAny])),
     path("api/", include(router.urls)),
 ]
-]
+
