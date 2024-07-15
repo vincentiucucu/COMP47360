@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 from dotenv import load_dotenv
 from datetime import timedelta
-from sshtunnel import SSHTunnelForwarder
+# from sshtunnel import SSHTunnelForwarder
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -103,7 +103,23 @@ WSGI_APPLICATION = "backend.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PWD'),
+        'HOST': os.environ.get('AZ_HOST'),
+        'PORT': os.environ.get('LOCAL_DB_PORT_ON_SERVER'),
+        'OPTIONS': {
+            'sslmode': 'require',
+            'options': '-c search_path=vendtune' # if no schema is specified, always search in vendtune schema
+        }
+    }
+}
+
 # Config and start the SSH tunnel
+'''
 ssh_tunnel = SSHTunnelForwarder (
     (os.environ.get('SERVER_IP'), int(os.environ.get('SSH_PORT'))),
     ssh_username=os.environ.get('SSH_USERNAME'),
@@ -125,6 +141,7 @@ DATABASES = {
         }
     }
 }
+'''
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
