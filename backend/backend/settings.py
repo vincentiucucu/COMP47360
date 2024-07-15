@@ -196,5 +196,5 @@ CORS_ALLOW_CREDENTIALS = True
 #     except KeyError:
 #         raise ImproperlyConfigured(f'Set the {var_name} environment variable.')
 
-GDAL_LIBRARY_PATH = '/opt/homebrew/Cellar/gdal/3.9.1/lib/libgdal.dylib'#get_env_variable('GDAL_LIBRARY_PATH')
-GEOS_LIBRARY_PATH = '/opt/homebrew/Cellar/geos/3.12.2/lib/libgeos_c.dylib'
+# GDAL_LIBRARY_PATH = '/opt/homebrew/Cellar/gdal/3.9.1/lib/libgdal.dylib'#get_env_variable('GDAL_LIBRARY_PATH')
+# GEOS_LIBRARY_PATH = '/opt/homebrew/Cellar/geos/3.12.2/lib/libgeos_c.dylib'
