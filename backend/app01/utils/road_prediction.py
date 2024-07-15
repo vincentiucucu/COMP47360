@@ -6,6 +6,7 @@ import geopandas as gpd
 from django.conf import settings
 
 def connect_to_postgres(query):
+    
     start_time = time.time()
     conn = None
     try:
@@ -79,7 +80,7 @@ def estimate_busyness(query, target_datetime):
 
     closest_rows = find_closest_rows(df, target_datetime)
 
-    df2 = pd.read_csv('/path/to/your/MHTN_zoned_streets.csv')
+    df2 = pd.read_csv('dataset/MHTN_zoned_streets.csv')
     df2 = df2.drop(columns=['address', 'zone_name', 'zone_geometry', 'zone_id'])
     df2['street_centroid'] = df2['street_centroid'].apply(wkt.loads)
     gdf = gpd.GeoDataFrame(df2, geometry='street_centroid')
