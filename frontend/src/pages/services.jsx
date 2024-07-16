@@ -2,9 +2,8 @@ import { Button, Box, Typography, Grid } from "@mui/material";
 import AppBar from "../components/HamburgerBox";
 import Map from "../components/MapBox";
 import DataGrid from "../components/DataGrid";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
-import Papa from 'papaparse';
 import { useState, useEffect } from "react";
 
 // import getPastServices from "../services/getPastServices"
@@ -32,6 +31,63 @@ function Services() {
   };
 
   const rows = [
+    createData(
+      1,
+      "Tue, 25/06/2024",
+      "11:00 - 15:00",
+      "AA08267",
+      "C4049",
+      "W. Durham Street New York, NY 10027",
+      "4500"
+    ),
+    createData(
+      2,
+      "Wed, 26/06/2024",
+      "09:00 - 13:00",
+      "BB09268",
+      "C4050",
+      "E. Grand Street New York, NY 10002",
+      "4800"
+    ),
+    createData(
+      3,
+      "Thu, 27/06/2024",
+      "10:00 - 14:00",
+      "CC10269",
+      "C4051",
+      "N. Main Street Brooklyn, NY 11201",
+      "5000"
+    ),
+    createData(
+      4,
+      "Fri, 28/06/2024",
+      "08:00 - 12:00",
+      "DD11270",
+      "C4052",
+      "S. Park Avenue Bronx, NY 10451",
+      "4700"
+    ),
+    createData(
+      5,
+      "Sat, 29/06/2024",
+      "12:00 - 16:00",
+      "EE12271",
+      "C4053",
+      "W. Market Street Queens, NY 11385",
+      "4900"
+    ),
+    createData(
+      6,
+      "Sun, 30/06/2024",
+      "07:00 - 11:00",
+      "FF13272",
+      "C4054",
+      "E. River Street Staten Island, NY 10301",
+      "5200"
+    ),
+  ];
+
+  const rows_2 = [
     createData(
       1,
       "Tue, 25/06/2024",
@@ -133,6 +189,24 @@ function Services() {
   const handleAddClick = () => {
     navigate("/planning");
   };
+
+  const location = useLocation();
+  const formData = location.state?.formData;
+
+  if (formData) {
+    const newRow = createData(
+      rows.length + 1,
+      formData.selectedDate, 
+      `${formData.selectedStartTime} - ${formData.selectedEndTime}`, 
+      formData.businessUnit,
+      formData.authorisedVendors,
+      formData.areas,
+      "2500"
+    );
+    rows.push(newRow);
+  }
+
+  console.log(formData);
 
   return (
     <Box sx={{ display: "grid", gridTemplateRows: "auto 1fr" }}>

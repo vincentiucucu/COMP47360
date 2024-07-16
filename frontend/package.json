@@ -22,6 +22,7 @@
     "axios": "^1.7.2",
     "date-fns": "^3.6.0",
     "dayjs": "^1.11.11",
+    "google-map-react": "^2.2.1",
     "jwt-decode": "^4.0.0",
     "papaparse": "^5.4.1",
     "react": "^18.3.1",
@@ -29,6 +30,7 @@
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.23.1",
     "react-time-picker": "^7.0.0",
+    "react-toastify": "^10.0.5",
     "sass": "^1.77.6"
   },
   "devDependencies": {
@@ -39,6 +41,6 @@
     "eslint-plugin-react": "^7.34.2",
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-react-refresh": "^0.4.7",
-    "vite": "^5.3.3"
+    "vite": "^5.3.4"
   }
 }

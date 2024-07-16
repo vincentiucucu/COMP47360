@@ -1,9 +1,18 @@
 import api from "../api";
+import { ACCESS_TOKEN } from "../constants"
+import { REFRESH_TOKEN } from "../constants"
 
-export const postRegister = async (username, useremail, password) => {
-  const route = "/api/signup";
+export const register = async (username, useremail, password) => {
+  const route = "/signup/";
   try {
-    const response = await api.post(route, { username, useremail, password });
+    console.log(`UName ${username} Email ${useremail} Password ${password}`)
+
+    const response = await api.post(route, 
+      { 
+        "business_name": username, 
+        "business_email": useremail, 
+        "password": password 
+      });
     localStorage.setItem(ACCESS_TOKEN, response.data.access);
     localStorage.setItem(REFRESH_TOKEN, response.data.refresh);
     return response;

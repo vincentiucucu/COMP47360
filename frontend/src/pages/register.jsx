@@ -11,7 +11,8 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
-// import { register } from '../services/registerApiService';
+import { register } from '../services/postRegister';
+import { toast } from 'react-toastify';
 
 function Copyright(props) {
   return (
@@ -29,32 +30,45 @@ function Copyright(props) {
 const defaultTheme = createTheme();
 
 export default function Register() {
-  const [businessName, setBusinessName] = React.useState("");
-  const [businessEmail, setBusinessEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    // setLoading(true);
-    // e.preventDefault();
-    // const data = new FormData(e.currentTarget);
-    // setBusinessName(data.get("businessName"));
-    // setBusinessEmail(data.get("email"))
-    // setPassword(data.get("newPassword"));
+    setLoading(true);
+    e.preventDefault();
+    const data = new FormData(e.currentTarget);
+    const businessName = data.get("businessName");
+    const businessEmail = data.get("email");
+    const password = data.get("new-password");
+    const passwordConf = data.get("confirm-password");
 
-    // try {
-    //   const res = await register(businessName, businessEmail, password);
-    //   if (res.status >= 200 && res.status < 300) {
-    //     navigate("/services");
-    //   } else {
-    //     navigate("/login");
-    //   }
-    // } catch (error) {
-    //   alert(error);
-    // } finally {
-    //   setLoading(false);
-    // }
+    try {
+      console.log(password)
+      console.log(passwordConf)
+      if(password != passwordConf)
+      {
+        toast.error('Passwords do not match. Please try again.', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+        return;
+      }
+      const res = await register(businessName, businessEmail, password);
+      if (res.status >= 200 && res.status < 300) {
+        navigate("/services");
+      } else {
+        navigate("/login");
+      }
+    } catch (error) {
+      alert(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -127,7 +141,7 @@ export default function Register() {
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
             >
-              Sign Up
+              {loading ? "Loading..." : "Sign Up"}
             </Button>
             <Grid container justifyContent="flex-end">
               <Grid item>

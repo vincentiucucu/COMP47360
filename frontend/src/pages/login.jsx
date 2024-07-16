@@ -13,7 +13,7 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
-// import { login } from '../services/loginApiService';
+import { login } from '../services/postLogin';
 
 function Copyright(props) {
   return (
@@ -36,30 +36,28 @@ function Copyright(props) {
 const defaultTheme = createTheme();
 
 export default function SignIn() {
-  const [username, setUsername] = React.useState("");
-  const [password, setPassword] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    // setLoading(true);
-    // e.preventDefault();
-    // const data = new FormData(e.currentTarget);
-    // setUsername(data.get("email"));
-    // setPassword(data.get("password"));
+    setLoading(true);
+    e.preventDefault();
+    const data = new FormData(e.currentTarget);
+    const username = data.get("email");
+    const password = data.get("password");
 
-    // try {
-    //   const res = await login(username, password);
-    //   if (res.status >= 200 && res.status < 300) {
-    //     navigate("/services");
-    //   } else {
-    //     navigate("/login");
-    //   }
-    // } catch (error) {
-    //   alert(error);
-    // } finally {
-    //   setLoading(false);
-    // }
+    try {
+      const res = await login(username, password);
+      if (res.status >= 200 && res.status < 300) {
+        navigate("/services");
+      } else {
+        navigate("/login");
+      }
+    } catch (error) {
+      alert(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -125,7 +123,7 @@ export default function SignIn() {
                 </Link>
               </Grid>
               <Grid item>
-                <Link href="/signin" variant="body2">
+                <Link href="/register" variant="body2">
                   {"Don't have an account? Sign Up"}
                 </Link>
               </Grid>

@@ -1,9 +1,12 @@
+import React, { useState, useEffect } from 'react';
+import GoogleMapReact from 'google-map-react';
 import { Box } from "@mui/material";
-import { GoogleMap, LoadScript, HeatmapLayer } from "@react-google-maps/api";
-import React, { useState, useCallback, useEffect } from 'react';
 
-export default function MapBox({ HeatMapCor }) {
+const MapBox = ({ initialHeatMapCor }) => {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+  const [heatMapData, setHeatMapData] = useState([]);
+  const [isDataValid, setIsDataValid] = useState(false);
 
   const containerStyle = {
     width: "100%",
@@ -203,61 +206,42 @@ export default function MapBox({ HeatMapCor }) {
     fullscreenControl: false,
   };
 
-  const center = {
-    lat: 40.7831,
-    lng: -73.9712,
-  };
+  const center = { lat: 40.7831, lng: -73.9712 };
+  const zoom = 13;
 
-  const [heatmapData, setHeatmapData] = useState([]);
-  const [mapInstance, setMapInstance] = useState(null);
-
-  const heatmapOptions = {
-    radius: 50,
-    opacity: 0.6 
-  };
-
-  const onLoad = useCallback((map) => {
-    setMapInstance(map);
-  }, []);
-
+  // Ensure initialHeatMapCor is an array with the correct structure
   useEffect(() => {
-    if (mapInstance && HeatMapCor.length > 0) {
-      const google = window.google;
-      const data = HeatMapCor.map(coord => ({
-        location: new google.maps.LatLng(coord.lat, coord.lng),
-        weight: 40 
-      }));
-      setHeatmapData(data);
+    if (Array.isArray(initialHeatMapCor) && initialHeatMapCor.length > 0) {
+      const validData = initialHeatMapCor.every(point => 'lat' in point && 'lng' in point);
+      setIsDataValid(validData);
+      if (validData) {
+        setHeatMapData(initialHeatMapCor);
+      }
     }
-  }, [HeatMapCor, mapInstance]);
+  }, [initialHeatMapCor]);
 
   return (
-    <Box
-      sx={{
-        p: "0px",
-        m: '0px',
-        display: "flex",
-        justifyContent: "center",
-        height: "100%",
-        width: "100%",
-      }}
-    >
-      <LoadScript
-        googleMapsApiKey={apiKey}
-        libraries={['visualization']}
-        sx={{ p: "0px", m: '0px' }}
-      >
-        <GoogleMap
-          sx={{ p: "0px", m: '0px' }}
-          mapContainerStyle={containerStyle}
-          center={center}
-          zoom={13}
-          options={options}
-          onLoad={onLoad}
-        >
-          <HeatmapLayer data={heatmapData} options={heatmapOptions} />
-        </GoogleMap>
-      </LoadScript>
+    <Box sx={{
+      p: "0px",
+      m: '0px',
+      display: "flex",
+      justifyContent: "center",
+      height: "100%",
+      width: "100%",
+    }}>
+      <GoogleMapReact
+        bootstrapURLKeys={{ key: apiKey, libraries: ['visualization'] }}
+        defaultCenter={center}
+        defaultZoom={zoom}
+        options={options}
+        heatmap={{
+          positions: isDataValid ? heatMapData : [],
+          options: { radius: 50, opacity: 1 },
+        }}
+        yesIWantToUseGoogleMapApiInternals
+      />
     </Box>
   );
 };
+
+export default MapBox;

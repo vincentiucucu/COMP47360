@@ -6,16 +6,22 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import "../styles/Common.scss";
 
-const Time = (props) => {
+const Time = ({ name, onTimeChange }) => {
   const [selectedTime, setSelectedTime] = React.useState(dayjs());
+
+  const handleTimeChange = (newValue) => {
+    setSelectedTime(newValue);
+    const formattedTime = newValue.format("HH:mm");
+    onTimeChange(formattedTime);
+  };
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Box sx={{ mb: 2, position: "relative" }}>
         <TimePicker
-          label={props.name}
+          label={name}
           value={selectedTime}
-          onChange={setSelectedTime}
+          onChange={handleTimeChange}
           className="DatePicker"
           renderInput={(params) => (
             <TextField {...params} fullWidth sx={{ mb: 2 }} />
