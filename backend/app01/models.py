@@ -139,7 +139,7 @@ class BusynessScore(models.Model):
     score = models.FloatField()
     zone = models.IntegerField()
     hour = models.DateTimeField()
-    centroid = models.PointField(srid=4326)
+    centroid = models.PointField()
     zone_busyness_id = models.AutoField(primary_key=True)
 
     class Meta:

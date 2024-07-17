@@ -36,7 +36,7 @@ def get_busyness_scores(request):
                 return HttpResponseBadRequest('Invalid datetime format. Use "%Y-%m-%d %H:%M:%S".')
 
             # Query to get busyness score
-            query = 'SELECT * FROM busyness_score;'
+            query = None#'SELECT * FROM busyness_score;'
 
             # Estimate busyness
             busy_score_data = estimate_busyness(query, user_datetime)
@@ -53,6 +53,7 @@ def get_recommendations_view(request):
         try:
             user_zone = request.GET.get('zone')
             user_datetime_str = request.GET.get('datetime')
+            head = request.GET.get('head')
 
             if not user_zone or not user_datetime_str:
                 return HttpResponseBadRequest('Zone and datetime must be provided.')
@@ -69,7 +70,7 @@ def get_recommendations_view(request):
             # busy_score_data = pd.read_json(busy_score_data_json)
 
             # Generate recommendations
-            recommendations = get_recommendations(events_df, user_zone, user_datetime)
+            recommendations = get_recommendations(events_df, user_zone, user_datetime,head)
 
             return JsonResponse(recommendations.to_dict(orient='records'), safe=False)
 
