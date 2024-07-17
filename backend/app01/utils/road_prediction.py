@@ -51,27 +51,30 @@ def connect_to_postgres(query):
         return None
 
     finally:
+        # print('total_time:',time.time() - start_time)
+        print(f'connect_to_postgres took {time.time() - start_time} seconds to complete')
+
         # Closing the connection
         if conn:
             cursor.close()
             conn.close()
             print("PostgreSQL connection closed.")
 
-    print(f'connect_to_postgres took {time.time() - start_time} seconds to complete')
 
 def find_closest_rows(df, target_datetime):
     print(5)
+    start_time = time.time()
 
     df['hour'] = pd.to_datetime(df['hour'])
     df['time_diff'] = abs(df['hour'] - target_datetime)
     df_sorted = df.sort_values(by=['zone', 'time_diff'])
     closest_rows = df_sorted.drop_duplicates(subset=['zone'], keep='first')
     closest_rows = closest_rows.drop(columns=['time_diff'])
+    print('find_closest_rows_time:',time.time() - start_time)
 
     return closest_rows
 
 def calculate_distance(geometry, closest_rows):
-    
 
     x = [(geometry.distance(i)) ** 2 for i in closest_rows['centroid']]
     y = closest_rows['score']
@@ -94,7 +97,10 @@ def estimate_busyness(query, target_datetime):
     df2 = df2.drop(columns=['address', 'zone_name', 'zone_geometry', 'zone_id'])
     df2['street_centroid'] = df2['street_centroid'].apply(wkt.loads)
     gdf = gpd.GeoDataFrame(df2, geometry='street_centroid')
+    start_time_2 = time.time()
     gdf['Score'] = gdf['street_centroid'].apply(calculate_distance, closest_rows=closest_rows) / 10 ** 5
-    print(time.time() - start_time)
-    print(gdf)
+    print('calculate_distance_time:',time.time() - start_time_2)
+
+    print('total_time:',time.time() - start_time)
+    # print(gdf)
     return gdf[['street_geometry','street_centroid', 'Score']]
