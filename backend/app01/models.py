@@ -37,8 +37,8 @@ class BusinessManager(BaseUserManager):
 # custom user model replacing base User model
 class Business(AbstractBaseUser):
     business_id = models.AutoField(primary_key=True)
-    business_name = models.CharField(unique=True)
-    password = models.CharField()
+    business_name = models.CharField(unique=True,max_length=32)
+    password = models.CharField(max_length=128)
     business_email = models.CharField(unique=True, max_length=254)
     created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     modified_at = models.DateTimeField(blank=True, null=True)
@@ -59,11 +59,11 @@ class Business(AbstractBaseUser):
 class BusinessUnit(models.Model):
     unit_id = models.AutoField(primary_key=True)
     business = models.ForeignKey('Business', on_delete=models.CASCADE)
-    unit_name = models.CharField()
-    permit_id = models.CharField(unique=True)
+    unit_name = models.CharField(max_length=32)
+    permit_id = models.CharField(unique=True,max_length=16)
     permit_expiry_date = models.DateField()
-    unit_type = models.CharField()
-    created_at = models.DateTimeField(blank=True, null=True)
+    unit_type = models.CharField(max_length=16)
+    created_at = models.DateTimeField(blank=True, null=True,auto_now_add=True)
 
     class Meta:
         db_table = 'business_units'
@@ -72,12 +72,12 @@ class BusinessUnit(models.Model):
 class Vendor(models.Model):
     vendor_id = models.AutoField(primary_key=True)
     business = models.ForeignKey('Business', on_delete=models.CASCADE)
-    vendor_name = models.CharField()
-    licence_id = models.CharField(unique=True)
+    vendor_name = models.CharField(max_length=32)
+    licence_id = models.CharField(unique=True,max_length=32)
     licence_expiry_date = models.DateField()
     vendor_email = models.CharField(unique=True, max_length=254)
     vendor_phone_number = models.CharField(unique=True, max_length=50, blank=True, null=True)
-    created_at = models.DateTimeField(blank=True, null=True)
+    created_at = models.DateTimeField(blank=True, null=True,auto_now_add=True)
 
     class Meta:
         db_table = 'vendors'
@@ -91,9 +91,9 @@ class Service(models.Model):
     service_start_time = models.TimeField()
     service_end_time = models.TimeField()
     location_coords = models.PointField()
-    location_address = models.CharField()
+    location_address = models.CharField(max_length=128)
     revenue = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True)
-    created_at = models.DateTimeField(blank=True, null=True)
+    created_at = models.DateTimeField(blank=True, null=True,auto_now_add=True)
 
     class Meta:
         db_table = 'services'
@@ -107,6 +107,20 @@ class ServiceVendor(models.Model):
 
     class Meta:
         db_table = 'service_vendors'
+
+
+class Log(models.Model):
+    log_id = models.AutoField(primary_key=True)
+    business = models.ForeignKey('Business', on_delete=models.CASCADE)
+    operation = models.CharField(max_length=50)
+    entity = models.CharField(max_length=50)
+    entity_id = models.IntegerField()
+    description = models.TextField(blank=True, null=True)
+    timestamp = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        db_table = 'logs'
+
 
 class ZonedStreet(models.Model):
     zoned_street_id = models.AutoField(primary_key=True)
@@ -127,9 +141,9 @@ class Restriction(models.Model):
     restriction_fstreet = models.CharField()
     restriction_tstreet = models.CharField()
     restriction_street_geometry = models.MultiLineStringField()
-    restriction_weekday = models.IntegerField()
-    restriction_ftime = models.DateTimeField()
-    restriction_ttime = models.DateTimeField()
+    restriction_weekday = models.CharField()
+    restriction_ftime = models.TimeField()
+    restriction_ttime = models.TimeField()
 
     class Meta:
         db_table = 'restrictions'
@@ -155,16 +169,3 @@ class Event(models.Model):
 
     class Meta:
         db_table = 'events'
-
-
-class Log(models.Model):
-    log_id = models.AutoField(primary_key=True)
-    business = models.ForeignKey('Business', on_delete=models.CASCADE)
-    operation = models.CharField(max_length=50)
-    entity = models.CharField(max_length=50)
-    entity_id = models.IntegerField()
-    description = models.TextField(blank=True, null=True)
-    timestamp = models.DateTimeField(blank=True, null=True)
-
-    class Meta:
-        db_table = 'logs'

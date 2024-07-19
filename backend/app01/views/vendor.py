@@ -3,10 +3,12 @@ from rest_framework.viewsets import ModelViewSet
 from app01.models import Vendor
 from app01.serializers import VendorSerializer
 from rest_framework.filters import OrderingFilter,SearchFilter
-from app01.view.pagination import Pagination
-from app01.view.filters import VendorFilter
+from app01.views.pagination import Pagination
+from app01.views.filters import VendorFilter
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from datetime import timedelta,datetime
+from django.utils.timezone import now
 
 class VendorView(ModelViewSet):
 
@@ -39,16 +41,45 @@ class VendorView(ModelViewSet):
 
 
 
-    # GET /api/vendors/recent_vendors/
+
+    # GET  http://127.0.0.1:8000/api/vendor/recent/?days=1
     @action(detail=False, methods=['get'])
-    def recent_vendors(self, request):
-        recent_vendors = Vendor.objects.all().order_by('-created_at')[:10]
-        page = self.paginate_queryset(recent_vendors)
-        if page is not None:
-            return self.get_paginated_response(page)
+    def recent(self, request):
+        days = request.query_params.get('days', 7)
+        try:
+            days = int(days)
+        except ValueError:
+            return Response({'error': 'Invalid value for days'})
+        start_date = now() - timedelta(days=days)
+        recent_events = self.queryset.filter(licence_expiry_date__gte=start_date, licence_expiry_date__lte=now()).order_by('-licence_expiry_date')
+        serializer = self.get_serializer(recent_events, many=True)
+        return Response(serializer.data)
+
+    # http://127.0.0.1:8000/api/vendor/today
+    @action(detail=False, methods=['get'])
+    def today(self, request):
+        start_date = datetime.combine(now().date(), datetime.min.time())
+        end_date = datetime.combine(now().date(), datetime.max.time())
+        today_events = self.queryset.filter(licence_expiry_date__gte=start_date, licence_expiry_date__lte=end_date).order_by('licence_expiry_date')
+        serializer = self.get_serializer(today_events, many=True)
+        return Response(serializer.data)
+
+
+
+    # GET  http://127.0.0.1:8000/api/vendor/future/?days=1
+    @action(detail=False, methods=['get'])
+    def future(self, request):
+        days = request.query_params.get('days', 7)
+        try:
+            days = int(days)
+        except ValueError:
+            return Response({'error': 'Invalid value for days'})
+        end_date = now() + timedelta(days=days)
+        recent_vendors = self.queryset.filter(licence_expiry_date__lte=end_date, licence_expiry_date__gte=now()).order_by('licence_expiry_date')[:10]
         serializer = self.get_serializer(recent_vendors, many=True)
         return Response(serializer.data)
-    # The response returns the 10 most recent Vendor records, with paging information:
+
+# Example of return results based on Pagination
 '''
 {
     "links": {
