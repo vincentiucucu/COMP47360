@@ -5,7 +5,7 @@ import pandas as pd
 import geopandas as gpd
 from django.conf import settings
 import os
-from ..models import BusynessScore
+from ..models import BusynessScore,StreetBusynessScore
 # import csv
 
 def connect_to_postgres(query=None):
@@ -20,6 +20,10 @@ def connect_to_postgres(query=None):
         # e.g., "score__gt=5" to filter scores greater than 5
         filters = {key: value for key, value in [item.split('=') for item in query.split(',')]}
         busyness_scores = BusynessScore.objects.filter(**filters)
+    elif query ==1:#dont run this lol
+        print("connect to db precalculated table")
+        busyness_scores = StreetBusynessScore.objects.all()
+
     else:
         # print("else")
         # Otherwise, return all records
@@ -56,6 +60,12 @@ def calculate_distance(geometry, closest_rows):
     # print(x,y)
     return sum(y / x)
 
+def min_max_scale(scores, new_min=0, new_max=10):
+    min_score = min(scores)
+    max_score = max(scores)
+    scaled_scores = [(new_max - new_min) * (score - min_score) / (max_score - min_score) + new_min for score in scores]
+    return scaled_scores
+
 def estimate_busyness(query, target_datetime):
     
     start_time = time.time()
@@ -84,6 +94,8 @@ def estimate_busyness(query, target_datetime):
     t2 = time.time()
 
     gdf['Score'] = gdf['street_centroid'].apply(calculate_distance, closest_rows=closest_rows) / 10 ** 5
+    gdf['Score'] = min_max_scale(gdf['Score'], new_min=0, new_max=10)
+
     print('Time to; calculate scores:',time.time() - t2)
 
     print('Time to; Total Time:',time.time() - start_time)
