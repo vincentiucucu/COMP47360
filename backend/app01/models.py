@@ -153,11 +153,21 @@ class BusynessScore(models.Model):
     score = models.FloatField()
     zone = models.IntegerField()
     hour = models.DateTimeField()
-    centroid = models.PointField(srid=4326)
+    centroid = models.PointField()
     zone_busyness_id = models.AutoField(primary_key=True)
 
     class Meta:
         db_table = 'busyness_score'
+
+class StreetBusynessScore(models.Model):
+    zoned_street_centroid = models.PointField()
+    hour = models.DateTimeField()
+    sum_score_div_distance_squared = models.FloatField()
+    zone_id = models.IntegerField()
+    id = models.AutoField(primary_key=True)
+
+    class Meta:
+        db_table = 'street_busyness_score_precalc'
 
 
 class Event(models.Model):
