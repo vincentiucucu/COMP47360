@@ -1,246 +1,133 @@
-import React, { useState, useEffect } from 'react';
-import GoogleMapReact from 'google-map-react';
-import { Box } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { MapContainer, TileLayer, GeoJSON, Marker, Popup } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import Papa from "papaparse";
+import L from "leaflet";
+import "leaflet.heat";
+import MapClickHandler from "./MapClickHandler";  // Import the new component
 
-const MapBox = ({ initialHeatMapCor }) => {
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+const HeatmapLayer = ({ points }) => {
+  const map = useMapEvents({});
 
-  const [heatMapData, setHeatMapData] = useState([]);
-  const [isDataValid, setIsDataValid] = useState(false);
-
-  const containerStyle = {
-    width: "100%",
-    height: "100%",
-    display: "flex",
-    justifyContent: 'start',
-    padding: "100px 0px 0px 0px",
-    margin: "0px 0px 0px 0px"
-  };
-
-  const mapStyles = [
-    {
-      elementType: "geometry",
-      stylers: [
-        {
-          color: "#f5f5f5",
-        },
-      ],
-    },
-    {
-      elementType: "labels.icon",
-      stylers: [
-        {
-          visibility: "off",
-        },
-      ],
-    },
-    {
-      elementType: "labels.text.fill",
-      stylers: [
-        {
-          color: "#616161",
-        },
-      ],
-    },
-    {
-      elementType: "labels.text.stroke",
-      stylers: [
-        {
-          color: "#f5f5f5",
-        },
-      ],
-    },
-    {
-      featureType: "administrative",
-      elementType: "geometry",
-      stylers: [
-        {
-          color: "",
-        },
-      ],
-    },
-    {
-      featureType: "administrative.land_parcel",
-      stylers: [
-        {
-          visibility: "",
-        },
-      ],
-    },
-    {
-      featureType: "administrative.locality",
-      elementType: "labels.text.fill",
-      stylers: [
-        {
-          color: "",
-        },
-      ],
-    },
-    {
-      featureType: "poi",
-      elementType: "labels.text.fill",
-      stylers: [
-        {
-          color: "#757575",
-        },
-      ],
-    },
-    {
-      featureType: "poi.park",
-      elementType: "geometry",
-      stylers: [
-        {
-          color: "#e5e5e5",
-        },
-      ],
-    },
-    {
-      featureType: "poi.park",
-      elementType: "labels.text.fill",
-      stylers: [
-        {
-          color: "#9e9e9e",
-        },
-      ],
-    },
-    {
-      featureType: "road",
-      elementType: "geometry",
-      stylers: [
-        {
-          color: "#ffffff",
-        },
-      ],
-    },
-    {
-      featureType: "road.arterial",
-      elementType: "geometry",
-      stylers: [
-        {
-          color: "#ffffff",
-        },
-      ],
-    },
-    {
-      featureType: "road.highway",
-      elementType: "geometry",
-      stylers: [
-        {
-          color: "#dadada",
-        },
-      ],
-    },
-    {
-      featureType: "road.highway",
-      elementType: "geometry.stroke",
-      stylers: [
-        {
-          color: "#c9c9c9",
-        },
-      ],
-    },
-    {
-      featureType: "road.highway.controlled_access",
-      elementType: "geometry",
-      stylers: [
-        {
-          color: "#e5e5e5",
-        },
-      ],
-    },
-    {
-      featureType: "road.local",
-      elementType: "labels.text.fill",
-      stylers: [
-        {
-          color: "#9e9e9e",
-        },
-      ],
-    },
-    {
-      featureType: "transit.line",
-      elementType: "geometry",
-      stylers: [
-        {
-          color: "#e5e5e5",
-        },
-      ],
-    },
-    {
-      featureType: "transit.station",
-      elementType: "geometry",
-      stylers: [
-        {
-          color: "#eeeeee",
-        },
-      ],
-    },
-    {
-      featureType: "water",
-      elementType: "geometry",
-      stylers: [
-        {
-          color: "#c9c9c9",
-        },
-      ],
-    },
-    {
-      featureType: "water",
-      elementType: "labels.text.fill",
-      stylers: [
-        {
-          color: "#9e9e9e",
-        },
-      ],
-    },
-  ];
-
-  const options = {
-    styles: mapStyles,
-    disableDefaultUI: true,
-    zoomControl: false,
-    mapTypeControl: false,
-    scaleControl: false,
-    streetViewControl: false,
-    rotateControl: false,
-    fullscreenControl: false,
-  };
-
-  const center = { lat: 40.7831, lng: -73.9712 };
-  const zoom = 13;
-
-  // Ensure initialHeatMapCor is an array with the correct structure
   useEffect(() => {
-    if (Array.isArray(initialHeatMapCor) && initialHeatMapCor.length > 0) {
-      const validData = initialHeatMapCor.every(point => 'lat' in point && 'lng' in point);
-      setIsDataValid(validData);
-      if (validData) {
-        setHeatMapData(initialHeatMapCor);
-      }
+    if (points && points.length > 0) {
+      const heat = L.heatLayer(points, { radius: 15, blur: 20, max: 10 }).addTo(map);
+      return () => {
+        map.removeLayer(heat);
+      };
+    }
+  }, [map, points]);
+
+  return null;
+};
+
+const MapBox = ({ initialHeatMapCor, addZoomLocations }) => {
+  const [geoJsonData, setGeoJsonData] = useState(null);
+  const [csvGeoJsonData, setCsvGeoJsonData] = useState(null);
+  const [heatmapData, setHeatmapData] = useState([]);
+  const [markers, setMarkers] = useState([]);
+
+  useEffect(() => {
+    fetch("/taxi_zone.csv")
+      .then((response) => response.text())
+      .then((csvData) => {
+        const parsedData = Papa.parse(csvData, { header: true }).data;
+        const geoJsonFeatures = parsedData
+          .map((row) => {
+            const feature = parseMultipolygon(row.geometry);
+            if (feature) {
+              feature.properties = {
+                location_id: row.location_id,
+              };
+              return feature;
+            }
+            return null;
+          })
+          .filter((feature) => feature !== null);
+        
+        setCsvGeoJsonData({
+          type: "FeatureCollection",
+          features: geoJsonFeatures,
+        });
+      });
+  }, []);
+
+  const parseMultipolygon = (data) => {
+    if (!data) return null;
+
+    const regex = /(-?\d+\.\d+)\s+(-?\d+\.\d+)/g;
+    const multipolygonMatches = data.match(/\(\(\(.*?\)\)\)/g);
+
+    if (!multipolygonMatches) return null;
+
+    const coordinates = multipolygonMatches.map((polygon) => {
+      const ringMatches = polygon.match(/\(\(.*?\)\)/g);
+      return ringMatches.map((ring) => {
+        const coords = [];
+        let match;
+        while ((match = regex.exec(ring)) !== null) {
+          coords.push([parseFloat(match[1]), parseFloat(match[2])]);
+        }
+        return coords;
+      });
+    });
+
+    return {
+      type: "Feature",
+      geometry: {
+        type: "MultiPolygon",
+        coordinates: coordinates,
+      },
+    };
+  };
+
+  useEffect(() => {
+    if (initialHeatMapCor && initialHeatMapCor.length > 0) {
+      const geoJsonFeatures = initialHeatMapCor.map((item) => ({
+        type: "Feature",
+        geometry: item.geometry,
+      }));
+      setGeoJsonData({
+        type: "FeatureCollection",
+        features: geoJsonFeatures,
+      });
+
+      const heatmapPoints = initialHeatMapCor.map((item) => [
+        item.geometry.coordinates[1],
+        item.geometry.coordinates[0],
+        10,
+      ]);
+      setHeatmapData(heatmapPoints);
     }
   }, [initialHeatMapCor]);
 
+  const center = [40.7831, -73.9712];
+  const zoom = 13;
+
   return (
-    <Box sx={{
-      p: "0px",
-      m: '0px',
-      display: "flex",
-      justifyContent: "center",
-      height: "100%",
-      width: "100%",
-    }}>
-      <GoogleMapReact
-        bootstrapURLKeys={{ key: apiKey, libraries: ['visualization'] }}
-        defaultCenter={center}
-        defaultZoom={zoom}
-        options={options}
-        heatmap={{
-          positions: isDataValid ? heatMapData : [],
-          options: { radius: 50, opacity: 1 },
-        }}
-        yesIWantToUseGoogleMapApiInternals
-      />
-    </Box>
+    <MapContainer
+      center={center}
+      zoom={zoom}
+      style={{
+        height: "100%",
+        width: "100%",
+      }}
+    >
+      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      {csvGeoJsonData && (
+        <GeoJSON data={csvGeoJsonData} />
+      )}
+      {heatmapData.length > 0 && <HeatmapLayer points={heatmapData} />}
+      <MapClickHandler onClick={addZoomLocations} />  {/* Add the MapClickHandler component */}
+      {markers.map((marker, idx) => (
+        <Marker key={idx} position={[marker.lat, marker.lng]}>
+          <Popup>
+            Score: {marker.score} <br />
+            Distance to Event: {marker.distance} meters
+          </Popup>
+        </Marker>
+      ))}
+    </MapContainer>
   );
 };
 

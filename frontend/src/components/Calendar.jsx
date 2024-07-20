@@ -10,12 +10,11 @@ import localizedFormat from 'dayjs/plugin/localizedFormat';
 dayjs.extend(localizedFormat);
 
 export default function BasicDatePicker({ onDateChange }) {
-  const [value, setValue] = React.useState(dayjs());
+  const [value, setValue] = React.useState(null);
 
   const handleDateChange = (newValue) => {
     setValue(newValue);
-    const formattedDate = newValue.format("ddd, DD/MM/YYYY");
-    onDateChange(formattedDate);
+    onDateChange(newValue);
   };
 
   return (

@@ -5,16 +5,88 @@ import DataGrid from "../components/DataGrid";
 import { useNavigate, useLocation } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import { useState, useEffect } from "react";
+import api from '../api';
 
-// import getPastServices from "../services/getPastServices"
-// import getPlannedServices from "../services/getPlannedServices"
-
-function createData(id, date, time, unit, vendor, address, EFT) {
-  return { id, date, time, unit, vendor, address, EFT };
+function createData(id, date, time, unit, business, address) {
+  return { id, date, time, unit, business, address };
 }
 
 function Services() {
-  
+  const [pastRows, setPastRows] = useState([]);
+  const [presentRows, setPresentRows] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const location = useLocation();
+  const formData = location.state?.formData;
+
+  useEffect(() => {
+    const fetchBusinessUnits = async () => {
+      setLoading(true);
+      try {
+        const response = await api.get('api/service/');
+        const data = response.data.results;
+        const today = new Date();
+        
+        const pastServices = [];
+        const presentServices = [];
+
+        data.forEach((item, index) => {
+          const serviceDate = new Date(item.service_date);
+          const endTime = new Date(`${item.service_date}T${item.service_end_time}`);
+          
+          const row = createData(
+            index + 1,
+            serviceDate.toLocaleDateString('en-US', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' }),
+            `${item.service_start_time} - ${item.service_end_time}`,
+            `${item.unit}`,
+            `${item.business}`,
+            item.location_address
+          );
+
+          if (serviceDate < today || (serviceDate.toDateString() === today.toDateString() && endTime < today)) {
+            pastServices.push(row);
+          } else {
+            presentServices.push(row);
+          }
+        });
+
+        setPastRows(pastServices);
+        setPresentRows(presentServices);
+
+        console.log("Past Rows: ", pastServices);
+        console.log("Present Rows: ", presentServices);
+      } catch (error) {
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBusinessUnits();
+  }, []);
+
+  // useEffect(() => {
+  //   if (formData) {
+  //     const newService = {
+  //       business: formData.businessUnit,
+  //       unit: formData.authorisedVendors,
+  //       service_date: formData.selectedDate,
+  //       service_start_time: formData.selectedStartTime,
+  //       service_end_time: formData.selectedEndTime,
+  //       location_address: formData.areas,
+  //     };
+
+  //     api.post('api/service/', newService)
+  //     .then(response => {
+        
+  //     })
+  //     .catch(error => {
+  //       console.error("There was an error creating the new service!", error);
+  //       setError(error);
+  //     });    }
+  // }, [formData]);
+
   const buttonStyles = {
     textTransform: "none",
     backgroundColor: "#F6F6F6",
@@ -30,122 +102,14 @@ function Services() {
     },
   };
 
-  const rows = [
-    createData(
-      1,
-      "Tue, 25/06/2024",
-      "11:00 - 15:00",
-      "AA08267",
-      "C4049",
-      "W. Durham Street New York, NY 10027",
-      "4500"
-    ),
-    createData(
-      2,
-      "Wed, 26/06/2024",
-      "09:00 - 13:00",
-      "BB09268",
-      "C4050",
-      "E. Grand Street New York, NY 10002",
-      "4800"
-    ),
-    createData(
-      3,
-      "Thu, 27/06/2024",
-      "10:00 - 14:00",
-      "CC10269",
-      "C4051",
-      "N. Main Street Brooklyn, NY 11201",
-      "5000"
-    ),
-    createData(
-      4,
-      "Fri, 28/06/2024",
-      "08:00 - 12:00",
-      "DD11270",
-      "C4052",
-      "S. Park Avenue Bronx, NY 10451",
-      "4700"
-    ),
-    createData(
-      5,
-      "Sat, 29/06/2024",
-      "12:00 - 16:00",
-      "EE12271",
-      "C4053",
-      "W. Market Street Queens, NY 11385",
-      "4900"
-    ),
-    createData(
-      6,
-      "Sun, 30/06/2024",
-      "07:00 - 11:00",
-      "FF13272",
-      "C4054",
-      "E. River Street Staten Island, NY 10301",
-      "5200"
-    ),
-  ];
-
-  const rows_2 = [
-    createData(
-      1,
-      "Tue, 25/06/2024",
-      "11:00 - 15:00",
-      "AA08267",
-      "C4049",
-      "W. Durham Street New York, NY 10027",
-      "4500"
-    ),
-    createData(
-      2,
-      "Wed, 26/06/2024",
-      "09:00 - 13:00",
-      "BB09268",
-      "C4050",
-      "E. Grand Street New York, NY 10002",
-      "4800"
-    ),
-    createData(
-      3,
-      "Thu, 27/06/2024",
-      "10:00 - 14:00",
-      "CC10269",
-      "C4051",
-      "N. Main Street Brooklyn, NY 11201",
-      "5000"
-    ),
-    createData(
-      4,
-      "Fri, 28/06/2024",
-      "08:00 - 12:00",
-      "DD11270",
-      "C4052",
-      "S. Park Avenue Bronx, NY 10451",
-      "4700"
-    ),
-    createData(
-      5,
-      "Sat, 29/06/2024",
-      "12:00 - 16:00",
-      "EE12271",
-      "C4053",
-      "W. Market Street Queens, NY 11385",
-      "4900"
-    ),
-    createData(
-      6,
-      "Sun, 30/06/2024",
-      "07:00 - 11:00",
-      "FF13272",
-      "C4054",
-      "E. River Street Staten Island, NY 10301",
-      "5200"
-    ),
-  ];
-
   const columns = [
     { field: "id", headerName: "ID", width: 90 },
+    {
+      field: "business",
+      headerName: "Business",
+      width: 90,
+      editable: true,
+    },
     {
       field: "date",
       headerName: "Date",
@@ -155,18 +119,12 @@ function Services() {
     {
       field: "time",
       headerName: "Time",
-      width: 120,
+      width: 180,
       editable: true,
     },
     {
       field: "unit",
       headerName: "Unit",
-      width: 90,
-      editable: true,
-    },
-    {
-      field: "vendor",
-      headerName: "Vendor",
       width: 100,
       editable: true,
     },
@@ -176,12 +134,6 @@ function Services() {
       width: 280,
       editable: true,
     },
-    {
-      field: "EFT",
-      headerName: "EFT",
-      width: 100,
-      editable: true,
-    },
   ];
 
   const navigate = useNavigate();
@@ -189,24 +141,6 @@ function Services() {
   const handleAddClick = () => {
     navigate("/planning");
   };
-
-  const location = useLocation();
-  const formData = location.state?.formData;
-
-  if (formData) {
-    const newRow = createData(
-      rows.length + 1,
-      formData.selectedDate, 
-      `${formData.selectedStartTime} - ${formData.selectedEndTime}`, 
-      formData.businessUnit,
-      formData.authorisedVendors,
-      formData.areas,
-      "2500"
-    );
-    rows.push(newRow);
-  }
-
-  console.log(formData);
 
   return (
     <Box sx={{ display: "grid", gridTemplateRows: "auto 1fr" }}>
@@ -275,14 +209,14 @@ function Services() {
                 }}
               >
                 <Box sx={{ minWidth: 750 }}>
-                  <DataGrid rows={rows} columns={columns} />
+                  <DataGrid rows={presentRows} columns={columns} />
                 </Box>
               </Box>
             </Box>
           </Grid>
 
           {/* Map */}
-          <Grid item xs={12} sm={12} md={12} lg={4} xl={4}>
+          <Grid item xs={12} sm={12} md={12} lg={4} xl={4} sx={{mb:'-150px', maxHeight:'1000px', width:'100px'}}>
             <Map />
           </Grid>
 
@@ -333,7 +267,7 @@ function Services() {
                 }}
               >
                 <Box sx={{ minWidth: 750 }}>
-                  <DataGrid rows={rows} columns={columns} />
+                  <DataGrid rows={pastRows} columns={columns} />
                 </Box>
               </Box>
             </Box>

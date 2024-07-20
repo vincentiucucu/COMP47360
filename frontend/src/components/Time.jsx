@@ -7,12 +7,11 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import "../styles/Common.scss";
 
 const Time = ({ name, onTimeChange }) => {
-  const [selectedTime, setSelectedTime] = React.useState(dayjs());
+  const [selectedTime, setSelectedTime] = React.useState(null);
 
   const handleTimeChange = (newValue) => {
     setSelectedTime(newValue);
-    const formattedTime = newValue.format("HH:mm");
-    onTimeChange(formattedTime);
+    onTimeChange(newValue);
   };
 
   return (
