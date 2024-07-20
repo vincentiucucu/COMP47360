@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from app01.views.business import RegisterBusinessView
+from app01.view import RegisterBusinessView, get_busyness_scores, get_recommendations_view
 from rest_framework.routers import DefaultRouter
 from app01.views import business_unit, log, service, vendor,serviceVendor,zoned_street,restriction,busyness_score,event
 from rest_framework.documentation import include_docs_urls
@@ -41,6 +41,8 @@ urlpatterns = [
     path("login/refresh/", TokenRefreshView.as_view(), name="refresh_token"),
     path("api-auth", include("rest_framework.urls")),
     path('docs/', include_docs_urls(title='Drf api', description='xxx',permission_classes=[AllowAny])),
-
+    path('get_busyness_scores/', get_busyness_scores, name='get_busyness_scores'),
+    path('get_recommendations/', get_recommendations_view, name='get_recommendations'),
+    
     path("api/", include(router.urls)),
 ]
