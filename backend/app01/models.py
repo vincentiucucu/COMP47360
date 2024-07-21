@@ -36,10 +36,9 @@ class BusinessManager(BaseUserManager):
 
 # custom user model replacing base User model
 class Business(AbstractBaseUser):
-    business_id = models.AutoField(primary_key=True)
-    business_name = models.CharField(unique=True,max_length=32)
-    password = models.CharField(max_length=128)
-    business_email = models.CharField(unique=True, max_length=254)
+    business_email = models.CharField(primary_key=True, max_length=254)
+    business_name = models.CharField(unique=True)
+    password = models.CharField()
     created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     modified_at = models.DateTimeField(blank=True, null=True)
     last_login = models.DateTimeField(auto_now=True) 
@@ -57,27 +56,25 @@ class Business(AbstractBaseUser):
 
 
 class BusinessUnit(models.Model):
-    unit_id = models.AutoField(primary_key=True)
-    business = models.ForeignKey('Business', on_delete=models.CASCADE)
-    unit_name = models.CharField(max_length=32)
-    permit_id = models.CharField(unique=True,max_length=16)
+    permit_id = models.CharField(primary_key=True)
+    unit_name = models.CharField()
+    unit_type = models.CharField()
     permit_expiry_date = models.DateField()
-    unit_type = models.CharField(max_length=16)
-    created_at = models.DateTimeField(blank=True, null=True,auto_now_add=True)
+    created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    business = models.ForeignKey('Business', on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'business_units'
 
 
 class Vendor(models.Model):
-    vendor_id = models.AutoField(primary_key=True)
-    business = models.ForeignKey('Business', on_delete=models.CASCADE)
-    vendor_name = models.CharField(max_length=32)
-    licence_id = models.CharField(unique=True,max_length=32)
+    licence_id = models.CharField(primary_key=True)
+    vendor_name = models.CharField()
     licence_expiry_date = models.DateField()
     vendor_email = models.CharField(unique=True, max_length=254)
     vendor_phone_number = models.CharField(unique=True, max_length=50, blank=True, null=True)
-    created_at = models.DateTimeField(blank=True, null=True,auto_now_add=True)
+    created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    business = models.ForeignKey('Business', on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'vendors'
@@ -85,15 +82,15 @@ class Vendor(models.Model):
 
 class Service(models.Model):
     service_id = models.AutoField(primary_key=True)
-    business = models.ForeignKey('Business', on_delete=models.CASCADE)
-    unit = models.ForeignKey('BusinessUnit', on_delete=models.CASCADE)
     service_date = models.DateField()
     service_start_time = models.TimeField()
     service_end_time = models.TimeField()
     location_coords = models.PointField()
     location_address = models.CharField(max_length=128)
     revenue = models.DecimalField(max_digits=7, decimal_places=2, blank=True, null=True)
-    created_at = models.DateTimeField(blank=True, null=True,auto_now_add=True)
+    created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    business = models.ForeignKey('Business', on_delete=models.CASCADE)
+    unit = models.ForeignKey('BusinessUnit', on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'services'
@@ -101,9 +98,9 @@ class Service(models.Model):
 
 class ServiceVendor(models.Model):
     service_vendor_id = models.AutoField(primary_key=True)
+    assigned_at = models.DateTimeField(blank=True, null=True, auto_now=True)
     service = models.ForeignKey('Service', on_delete=models.CASCADE)
     vendor = models.ForeignKey('Vendor', on_delete=models.CASCADE)
-    assigned_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         db_table = 'service_vendors'
@@ -111,12 +108,12 @@ class ServiceVendor(models.Model):
 
 class Log(models.Model):
     log_id = models.AutoField(primary_key=True)
-    business = models.ForeignKey('Business', on_delete=models.CASCADE)
     operation = models.CharField(max_length=50)
     entity = models.CharField(max_length=50)
     entity_id = models.IntegerField()
     description = models.TextField(blank=True, null=True)
     timestamp = models.DateTimeField(blank=True, null=True)
+    business = models.ForeignKey('Business', on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'logs'
@@ -128,19 +125,19 @@ class ZonedStreet(models.Model):
     street_geometry = models.MultiLineStringField()
     street_centroid = models.PointField()
     zone_id = models.IntegerField()
-    zone_name = models.CharField()
-    zone_geometry = models.MultiPolygonField()
 
     class Meta:
         db_table = 'zoned_streets'
 
 
 class Restriction(models.Model):
-    restriction_id = models.CharField(primary_key=True) # mapped to UNIQID in source data
+    restriction_id = models.CharField(primary_key=True)
     restriction_street = models.CharField()
     restriction_fstreet = models.CharField()
     restriction_tstreet = models.CharField()
-    restriction_street_geometry = models.MultiLineStringField()
+    restriction_fdate = models.DateTimeField()
+    restriction_tdate = models.DateTimeField()
+    restriction_street_geometry = models.GeometryField()
     restriction_weekday = models.CharField()
     restriction_ftime = models.TimeField()
     restriction_ttime = models.TimeField()
@@ -149,7 +146,7 @@ class Restriction(models.Model):
         db_table = 'restrictions'
 
 
-class BusynessScore(models.Model):
+class ZoneBusynessScore(models.Model):
     score = models.FloatField()
     zone = models.IntegerField()
     hour = models.DateTimeField()
@@ -157,12 +154,12 @@ class BusynessScore(models.Model):
     zone_busyness_id = models.AutoField(primary_key=True)
 
     class Meta:
-        db_table = 'busyness_score'
+        db_table = 'zones_busyness_score'
 
 class StreetBusynessScore(models.Model):
     zoned_street_centroid = models.PointField()
     hour = models.DateTimeField()
-    sum_score_div_distance_squared = models.FloatField()
+    score = models.FloatField()
     zone_id = models.IntegerField()
     id = models.AutoField(primary_key=True)
 
@@ -179,3 +176,11 @@ class Event(models.Model):
 
     class Meta:
         db_table = 'events'
+
+class TaxiZone(models.Model):
+    zone_id = models.IntegerField(primary_key=True)
+    zone_name = models.CharField()
+    zone_geometry = models.MultiPolygonField()
+
+    class Meta:
+        db_table = 'taxi_zones'
