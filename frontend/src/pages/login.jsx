@@ -130,6 +130,7 @@ export default function SignIn() {
 
     try {
       const res = await login(username, password);
+      
       if (res.status >= 200 && res.status < 300) {
         navigate("/services");
       } else {
