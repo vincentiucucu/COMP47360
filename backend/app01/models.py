@@ -128,8 +128,6 @@ class ZonedStreet(models.Model):
     street_geometry = models.MultiLineStringField()
     street_centroid = models.PointField()
     zone_id = models.IntegerField()
-    zone_name = models.CharField()
-    zone_geometry = models.MultiPolygonField()
 
     class Meta:
         db_table = 'zoned_streets'
@@ -179,3 +177,11 @@ class Event(models.Model):
 
     class Meta:
         db_table = 'events'
+
+class TaxiZone(models.Model):
+    zone_id = models.IntegerField(primary_key=True)
+    zone_name = models.CharField()
+    zone_geometry = models.MultiPolygonField()
+
+    class Meta:
+        db_table = 'taxi_zones'
