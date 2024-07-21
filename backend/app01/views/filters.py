@@ -1,5 +1,5 @@
 import django_filters
-from app01.models import BusinessUnit,Vendor,Service,Log,ZonedStreet,BusynessScore,Restriction,Event
+from app01.models import BusinessUnit,Vendor,Service,Log,ZonedStreet,ZoneBusynessScore,Restriction,Event
 from django.contrib.gis.geos import Point, MultiPolygon, MultiLineString
 from django.contrib.gis.measure import D
 from django.core.exceptions import ValidationError
@@ -258,7 +258,7 @@ class BusynessScoreFilter(django_filters.FilterSet):
     centroid = django_filters.CharFilter(method='filter_centroid')
 
     class Meta:
-        model = BusynessScore
+        model = ZoneBusynessScore
         fields = [
             'score_gt','score_lt','zone','hour','centroid',
         ]

@@ -1,7 +1,7 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.viewsets import ModelViewSet
-from app01.models import BusynessScore
-from app01.serializers import BusynessScoreSerializer
+from app01.models import ZoneBusynessScore
+from app01.serializers import ZoneBusynessScoreSerializer
 from rest_framework.filters import OrderingFilter, SearchFilter
 from app01.views.pagination import Pagination
 from app01.views.filters import BusynessScoreFilter
@@ -11,8 +11,8 @@ from django.utils.timezone import now
 from datetime import timedelta,datetime
 
 class BusynessScoreView(ModelViewSet):
-    queryset = BusynessScore.objects.all()
-    serializer_class = BusynessScoreSerializer
+    queryset = ZoneBusynessScore.objects.all()
+    serializer_class = ZoneBusynessScoreSerializer
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
     filterset_class = BusynessScoreFilter
     pagination_class = Pagination
