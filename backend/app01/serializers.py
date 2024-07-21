@@ -1,7 +1,6 @@
 from app01.models import Business,BusinessUnit,Vendor,Service,Log,ServiceVendor,ZonedStreet,Restriction,ZoneBusynessScore,Event
 from rest_framework import serializers
-from django.contrib.gis.geos import Point
-from django.contrib.gis.geos import MultiPolygon, Polygon, MultiLineString, LineString
+from django.contrib.gis.geos import Point, MultiPolygon, Polygon, MultiLineString, LineString
 
 class BusinessSerializer(serializers.ModelSerializer):
     
@@ -16,21 +15,18 @@ class BusinessSerializer(serializers.ModelSerializer):
         return Business.objects.create_user(**validated_data)
 
 
-
-
-
 class BusinessUnitSerializer(serializers.ModelSerializer):
     class Meta:
         model = BusinessUnit
-        fields = [ 'business', 'unit_name', 'permit_id', 'permit_expiry_date', 'unit_type']
-
-
+        fields = ['permit_id', 'unit_name', 'unit_type', 'permit_expiry_date', "business"]
+        read_only_fields = ['business']
 
 
 class VendorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vendor
-        fields = ['business','vendor_name','licence_id','licence_expiry_date','vendor_email','vendor_phone_number' ]
+        fields = ['licence_id', 'vendor_name', 'licence_expiry_date', 'vendor_email', 'vendor_phone_number', 'business']
+        read_only_fields = ['business']
 
 
 
