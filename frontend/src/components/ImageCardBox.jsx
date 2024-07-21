@@ -5,7 +5,6 @@ const ImageCardBox = ({ Image, Title, Count }) => {
   return (
     <Box sx={{ 
       backgroundColor: 'lightgrey', 
-      padding: 2, 
       borderRadius: 2, 
       textAlign: 'center', 
       display: 'flex', 

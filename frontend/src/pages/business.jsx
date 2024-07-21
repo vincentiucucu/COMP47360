@@ -1,3 +1,4 @@
+// Business.jsx
 import React, { useState, useEffect } from 'react';
 import { Button, Box, Typography, Grid } from '@mui/material';
 import AppBar from '../components/HamburgerBox';
@@ -9,6 +10,8 @@ import GroupIcon from '@mui/icons-material/Group';
 import ImageCardBox from '../components/ImageCardBox'; // Make sure this path is correct
 import getBusinessUnits from '../services/getBusinessUnits';
 import getVendors from '../services/getVendorDetails';
+import AddDialog from '../components/AddDialog'; // Make sure this path is correct
+import api from '../api';
 
 const buttonStyles = {
   textTransform: 'none',
@@ -46,6 +49,10 @@ const gridStyles = {
 export default function Business() {
   const [businessRows, setBusinessRows] = useState([]);
   const [vendorRows, setVendorRows] = useState([]);
+  const [nextBusinessId, setNextBusinessId] = useState(1); // Added state for next business ID
+  const [nextVendorId, setNextVendorId] = useState(1); // Added state for next vendor ID
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogType, setDialogType] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -54,6 +61,8 @@ export default function Business() {
       const vendorData = await getVendors();
       setBusinessRows(businessData);
       setVendorRows(vendorData);
+      setNextBusinessId(businessData.length + 1); // Initialize next business ID
+      setNextVendorId(vendorData.length + 1); // Initialize next vendor ID
     };
 
     fetchData();
@@ -61,7 +70,7 @@ export default function Business() {
 
   const businessColumns = [
     { field: 'id', headerName: 'ID', width: 90 },
-    { field: 'business', headerName: 'Business', width: 150 },
+    { field: 'business', headerName: 'Business', width: 150, editable: true },
     { field: 'unit_name', headerName: 'Unit Name', width: 150, editable: true },
     { field: 'permit_id', headerName: 'Permit ID', width: 120, editable: true },
     { field: 'permit_expiry_date', headerName: 'Permit Expiry Date', width: 150, editable: true },
@@ -70,7 +79,7 @@ export default function Business() {
 
   const vendorColumns = [
     { field: 'id', headerName: 'ID', width: 90 },
-    { field: 'business', headerName: 'Business', width: 150 },
+    { field: 'business', headerName: 'Business', width: 150, editable: true },
     { field: 'vendor_name', headerName: 'Vendor Name', width: 150, editable: true },
     { field: 'licence_id', headerName: 'Licence ID', width: 120, editable: true },
     { field: 'licence_expiry_date', headerName: 'Licence Expiry Date', width: 150, editable: true },
@@ -78,8 +87,42 @@ export default function Business() {
     { field: 'vendor_phone_number', headerName: 'Vendor Phone Number', width: 150, editable: true },
   ];
 
-  const handleAddClick = () => {
-    navigate('/planning');
+  const handleAddClick = (type) => {
+    setDialogType(type);
+    setDialogOpen(true);
+  };
+
+  const handleAddBusinessUnit = async (newBusinessUnit) => {
+    try {
+      const response = await api.post('/api/business_unit', newBusinessUnit);
+      setBusinessRows([...businessRows, { ...newBusinessUnit, id: nextBusinessId }]);
+      setNextBusinessId(nextBusinessId + 1);
+    } catch (error) {
+      console.error('Error adding business unit:', error);
+    }
+  };
+
+  const handleAddVendor = async (newVendor) => {
+    try {
+      const response = await api.post('/api/vendor', newVendor);
+      setVendorRows([...vendorRows, { ...newVendor, id: nextVendorId }]);
+      setNextVendorId(nextVendorId + 1);
+    } catch (error) {
+      console.error('Error adding vendor:', error);
+    }
+  };
+
+  const handleDialogAdd = (data) => {
+    if (dialogType === 'business') {
+      handleAddBusinessUnit(data);
+    } else if (dialogType === 'vendor') {
+      handleAddVendor(data);
+    }
+    setDialogOpen(false); // Close the dialog after adding
+  };
+
+  const handleDialogClose = () => {
+    setDialogOpen(false);
   };
 
   return (
@@ -111,7 +154,7 @@ export default function Business() {
             <Box sx={boxStyles}>
               <Box sx={{ p: '10px 0px', display: 'grid', gridTemplateColumns: 'auto 1fr', alignSelf: 'start' }}>
                 <Typography sx={{ color: 'black', pr: '10px', fontSize: '25px', alignContent: 'center' }}>Business Units</Typography>
-                <Button variant="outlined" startIcon={<AddIcon />} sx={buttonStyles} onClick={handleAddClick}>Add</Button>
+                <Button variant="outlined" startIcon={<AddIcon />} sx={buttonStyles} onClick={() => handleAddClick('business')}>Add</Button>
               </Box>
               <Box sx={gridStyles.overflow}>
                 <DataGrid rows={businessRows} columns={businessColumns} />
@@ -124,7 +167,7 @@ export default function Business() {
             <Box sx={boxStyles}>
               <Box sx={{ p: '10px 0px', display: 'grid', gridTemplateColumns: 'auto 1fr', alignSelf: 'start' }}>
                 <Typography sx={{ color: 'black', pr: '10px', fontSize: '25px', alignContent: 'center' }}>Authorised Vendors</Typography>
-                <Button variant="outlined" startIcon={<AddIcon />} sx={buttonStyles} onClick={handleAddClick}>Add</Button>
+                <Button variant="outlined" startIcon={<AddIcon />} sx={buttonStyles} onClick={() => handleAddClick('vendor')}>Add</Button>
               </Box>
               <Box sx={gridStyles.overflow}>
                 <DataGrid rows={vendorRows} columns={vendorColumns} />
@@ -133,6 +176,13 @@ export default function Business() {
           </Grid>
         </Grid>
       </Box>
+
+      <AddDialog
+        open={dialogOpen}
+        handleClose={handleDialogClose}
+        handleAdd={handleDialogAdd}
+        type={dialogType}
+      />
     </Box>
   );
 }
