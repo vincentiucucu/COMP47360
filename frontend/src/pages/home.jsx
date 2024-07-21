@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Button, Grid, Typography, Link, Avatar } from "@mui/material";
+import { Box, Button, Grid, Typography, Link } from "@mui/material";
 import logo from "../assets/Images/Logo/VendTune_Logo.png";
 import dashboard from "../assets/Images/StockImages/DashboardImg.png";
 import business from "../assets/Images/StockImages/BusinessImg.png";
@@ -22,15 +22,15 @@ const buttonStyle = {
 const Main = () => {
   const [image, setImage] = useState(dashboard);
 
-const handleButton = (text) => {
-  if (text == "Dashboard") {
-    setImage(dashboard);
-  } else if (text == "Business") {
-    setImage(business);
-  } else {
-    setImage(services);
-  }
-};
+  const handleButton = (text) => {
+    if (text === "Dashboard") {
+      setImage(dashboard);
+    } else if (text === "Business") {
+      setImage(business);
+    } else {
+      setImage(services);
+    }
+  };
 
   return (
     <Box
@@ -47,11 +47,11 @@ const handleButton = (text) => {
         mb: "-10px",
       }}
     >
-      <Grid container spacing={2} sx={{ padding: "20px", margin: "0px" }}>
+      <Grid container spacing={2} sx={{ pb: "10px", mb: "10px", pt:'10px' }}>
         <Grid item xs={6} sx={{ textAlign: "start" }}>
           <Box sx={{ display: "flex", textAlign: "center" }}>
             <img src={logo} alt="Logo" style={{ height: "30px" }} />
-          </Box>{" "}
+          </Box>
         </Grid>
         <Grid item xs={6} sx={{ textAlign: "end" }}>
           <Link
@@ -63,12 +63,30 @@ const handleButton = (text) => {
           </Link>
         </Grid>
         <Grid item xs={12} sx={{ textAlign: "center" }}>
-          <Typography variant="h2" sx={{ fontWeight: "bold" }}>
+          <Typography
+            variant="h2"
+            sx={{
+              fontWeight: "bold",
+              fontSize: {
+                xs: "2rem",
+                sm: "3rem",
+                md: "4rem",
+              },
+            }}
+          >
             Mobile Food Vending Made Easy
           </Typography>
           <Typography
             variant="h5"
-            sx={{ marginTop: "10px", marginBottom: "20px" }}
+            sx={{
+              marginTop: "10px",
+              marginBottom: "20px",
+              fontSize: {
+                xs: "1rem",
+                sm: "1.25rem",
+                md: "1.5rem",
+              },
+            }}
           >
             A Data-Driven Approach to Managing Your Mobile Food Vending Business
           </Typography>
@@ -82,11 +100,29 @@ const handleButton = (text) => {
           >
             <Typography
               variant="h5"
-              sx={{ fontWeight: "bold", marginBottom: "10px" }}
+              sx={{
+                fontWeight: "bold",
+                marginBottom: "10px",
+                fontSize: {
+                  xs: "1.2rem",
+                  sm: "1.5rem",
+                  md: "1.75rem",
+                },
+              }}
             >
               High-level Dashboard
             </Typography>
-            <Typography variant="body1" sx={{ marginBottom: "20px" }}>
+            <Typography
+              variant="body1"
+              sx={{
+                marginBottom: "20px",
+                fontSize: {
+                  xs: "0.875rem",
+                  sm: "1rem",
+                  md: "1.125rem",
+                },
+              }}
+            >
               Track key metrics and monitor your business' growth
             </Typography>
           </Grid>
@@ -98,11 +134,29 @@ const handleButton = (text) => {
           >
             <Typography
               variant="h5"
-              sx={{ fontWeight: "bold", marginBottom: "10px" }}
+              sx={{
+                fontWeight: "bold",
+                marginBottom: "10px",
+                fontSize: {
+                  xs: "1.2rem",
+                  sm: "1.5rem",
+                  md: "1.75rem",
+                },
+              }}
             >
               Business Management
             </Typography>
-            <Typography variant="body1" sx={{ marginBottom: "20px" }}>
+            <Typography
+              variant="body1"
+              sx={{
+                marginBottom: "20px",
+                fontSize: {
+                  xs: "0.875rem",
+                  sm: "1rem",
+                  md: "1.125rem",
+                },
+              }}
+            >
               Add and monitor business units and authorized vendors
             </Typography>
           </Grid>
@@ -114,11 +168,29 @@ const handleButton = (text) => {
           >
             <Typography
               variant="h5"
-              sx={{ fontWeight: "bold", marginBottom: "10px" }}
+              sx={{
+                fontWeight: "bold",
+                marginBottom: "10px",
+                fontSize: {
+                  xs: "1.2rem",
+                  sm: "1.5rem",
+                  md: "1.75rem",
+                },
+              }}
             >
               Location Recommendation
             </Typography>
-            <Typography variant="body1" sx={{ marginBottom: "20px" }}>
+            <Typography
+              variant="body1"
+              sx={{
+                marginBottom: "20px",
+                fontSize: {
+                  xs: "0.875rem",
+                  sm: "1rem",
+                  md: "1.125rem",
+                },
+              }}
+            >
               Plan your set-up location based on busyness data
             </Typography>
           </Grid>

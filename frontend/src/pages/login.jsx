@@ -1,7 +1,6 @@
 import * as React from "react";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
-import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
@@ -11,9 +10,94 @@ import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 import { login } from '../services/postLogin';
+import '../styles/Login.scss'
+
+const containerStyle = {
+  bgcolor: 'white',
+  width: '100%',
+  height: '100vh',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+};
+
+const boxStyle = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  animation: "fadeIn 1s ease-in-out",
+  color: "white",
+  padding: "20px",
+  borderRadius: "10px",
+  boxShadow: "0px 0px 100px 15px #ff7043",
+  backdropFilter: 'blur(5px)',
+};
+
+const avatarStyle = {
+  m: 1,
+  bgcolor: "#ff7043",
+  width: 56,
+  height: 56,
+  animation: "bounce 1s infinite",
+};
+
+const typographyStyle = {
+  fontFamily: "'Roboto', sans-serif",
+  fontWeight: "bold",
+  color: "#ff7043",
+  letterSpacing: "0.5px",
+};
+
+const textFieldStyle = {
+  "& .MuiInputLabel-root": { color: "black" },
+  "& .MuiOutlinedInput-root": {
+    "& > fieldset": { borderColor: "black" },
+  },
+  "& .MuiOutlinedInput-root:hover": {
+    "& > fieldset": { borderColor: "black" },
+  },
+  "& .MuiOutlinedInput-root.Mui-focused": {
+    "& > fieldset": { borderColor: "black" },
+  },
+  input: { color: "black" }
+};
+
+
+const formControlLabelStyle = {
+  "& .MuiTypography-root": {
+    fontSize: "0.875rem",
+    color: "#ff7043",
+  },
+};
+
+const buttonStyle = {
+  mt: 3,
+  mb: 2,
+  py: 1.5,
+  fontSize: "1rem",
+  fontWeight: "bold",
+  textTransform: "none",
+  bgcolor: "#ff7043",
+  color: "white",
+  boxShadow: "0 3px 5px 2px rgba(255, 105, 135, .3)",
+  "&:hover": {
+    bgcolor: "#ff8a65",
+    boxShadow: "0 3px 5px 2px rgba(255, 105, 135, .5)",
+  },
+  transition: "all 0.3s ease-in-out",
+};
+
+const linkStyle = {
+  color: "#ff7043",
+};
+
+const copyrightStyle = {
+  mt: 8,
+  mb: 4,
+  color: "black",
+};
 
 function Copyright(props) {
   return (
@@ -32,8 +116,6 @@ function Copyright(props) {
     </Typography>
   );
 }
-
-const defaultTheme = createTheme();
 
 export default function SignIn() {
   const [loading, setLoading] = React.useState(false);
@@ -61,161 +143,71 @@ export default function SignIn() {
   };
 
   return (
-    <Box sx={{ bgcolor: '#333', width: '100%', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <ThemeProvider theme={defaultTheme}>
-        <Container component="main" maxWidth="xs">
-          <CssBaseline />
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              animation: "fadeIn 1s ease-in-out",
-              color: "white",
-              padding: "20px",
-              borderRadius: "10px",
-              boxShadow: "0px 0px 10px rgba(0,0,0,0.5)",
-              backdropFilter: 'blur(20px)'
-            }}
+    <Box sx={containerStyle}>
+      <Container component="main" maxWidth="xs">
+        <Box sx={boxStyle}>
+          <Avatar sx={avatarStyle}>
+            <LockOutlinedIcon sx={{ fontSize: 32 }} />
+          </Avatar>
+          <Typography
+            component="h1"
+            variant="h5"
+            sx={typographyStyle}
           >
-            <Avatar
-              sx={{
-                m: 1,
-                bgcolor: "#ff7043",
-                width: 56,
-                height: 56,
-                animation: "bounce 1s infinite",
-              }}
+            Sign in
+          </Typography>
+          <Box
+            component="form"
+            onSubmit={handleSubmit}
+            noValidate
+            sx={{ mt: 1 }}
+          >
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              label="Email Address"
+              name="email"
+              autoComplete="email"
+              autoFocus
+              sx={textFieldStyle}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="Password"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+              sx={textFieldStyle}
+            />
+            <FormControlLabel
+              control={<Checkbox value="remember" color="primary" />}
+              label="Remember me"
+              sx={formControlLabelStyle}
+            />
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={buttonStyle}
             >
-              <LockOutlinedIcon sx={{ fontSize: 32 }} />
-            </Avatar>
-            <Typography
-              component="h1"
-              variant="h5"
-              sx={{
-                fontFamily: "'Roboto', sans-serif",
-                fontWeight: "bold",
-                color: "#ff7043",
-                letterSpacing: "0.5px",
-              }}
-            >
-              Sign in
-            </Typography>
-            <Box
-              component="form"
-              onSubmit={handleSubmit}
-              noValidate
-              sx={{ mt: 1 }}
-            >
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-                autoComplete="email"
-                autoFocus
-                sx={{
-                  "& .MuiInputLabel-root": { color: "#ff7043" },
-                  "& .MuiOutlinedInput-root": {
-                    "& > fieldset": { borderColor: "#ff7043" },
-                  },
-                  "& .MuiOutlinedInput-root:hover": {
-                    "& > fieldset": { borderColor: "#ff7043" },
-                  },
-                  "& .MuiOutlinedInput-root.Mui-focused": {
-                    "& > fieldset": { borderColor: "#ff7043" },
-                  },
-                  input: { color: "black" } // Ensure input text is visible
-                }}
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-                sx={{
-                  "& .MuiInputLabel-root": { color: "#ff7043" },
-                  "& .MuiOutlinedInput-root": {
-                    "& > fieldset": { borderColor: "#ff7043" },
-                  },
-                  "& .MuiOutlinedInput-root:hover": {
-                    "& > fieldset": { borderColor: "#ff7043" },
-                  },
-                  "& .MuiOutlinedInput-root.Mui-focused": {
-                    "& > fieldset": { borderColor: "#ff7043" },
-                  },
-                  input: { color: "black" } // Ensure input text is visible
-                }}
-              />
-              <FormControlLabel
-                control={<Checkbox value="remember" color="primary" />}
-                label="Remember me"
-                sx={{
-                  "& .MuiTypography-root": {
-                    fontSize: "0.875rem",
-                    color: "#ff7043",
-                  },
-                }}
-              />
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{
-                  mt: 3,
-                  mb: 2,
-                  py: 1.5,
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  textTransform: "none",
-                  bgcolor: "#ff7043",
-                  color: "white",
-                  boxShadow: "0 3px 5px 2px rgba(255, 105, 135, .3)",
-                  "&:hover": {
-                    bgcolor: "#ff8a65",
-                    boxShadow: "0 3px 5px 2px rgba(255, 105, 135, .5)",
-                  },
-                  transition: "all 0.3s ease-in-out",
-                }}
-              >
-                {loading ? "Loading..." : "Sign In"}
-              </Button>
-              <Grid container>
-                <Grid item xs>
-                  <Link href="#" variant="body2" sx={{ color: "#ff7043" }}>
-                    Forgot password?
-                  </Link>
-                </Grid>
-                <Grid item>
-                  <Link href="/register" variant="body2" sx={{ color: "#ff7043" }}>
-                    {"Don't have an account? Sign Up"}
-                  </Link>
-                </Grid>
+              {loading ? "Loading..." : "Sign In"}
+            </Button>
+            <Grid container>
+              <Grid item>
+                <Link href="/register" variant="body2" sx={linkStyle}>
+                  {"Don't have an account? Sign Up"}
+                </Link>
               </Grid>
-            </Box>
+            </Grid>
           </Box>
-          <Copyright sx={{ mt: 8, mb: 4, color: "#ff7043" }} />
-        </Container>
-        <style>
-          {`
-            @keyframes fadeIn {
-              0% { opacity: 0; }
-              100% { opacity: 1; }
-            }
-
-            @keyframes bounce {
-              0%, 100% { transform: translateY(0); }
-              50% { transform: translateY(-10px); }
-            }
-          `}
-        </style>
-      </ThemeProvider>
+        </Box>
+        <Copyright sx={copyrightStyle} />
+      </Container>
     </Box>
   );
 }

@@ -1,7 +1,6 @@
 import * as React from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
-import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
@@ -9,10 +8,87 @@ import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import { register } from '../services/postRegister';
 import { toast } from 'react-toastify';
+import '../styles/Register.scss'
+
+const containerStyle = {
+  bgcolor: 'white',
+  width: '100%',
+  height: '100vh',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexDirection:'column',
+};
+
+const boxStyle = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  animation: "fadeIn 1s ease-in-out",
+  color: "white",
+  padding: "20px",
+  borderRadius: "10px",
+  boxShadow: "0px 0px 100px 15px #ff7043",
+  backdropFilter: 'blur(5px)',
+};
+
+const avatarStyle = {
+  m: 1,
+  bgcolor: "#ff7043",
+  width: 56,
+  height: 56,
+  animation: "bounce 1s infinite",
+};
+
+const typographyStyle = {
+  fontFamily: "'Roboto', sans-serif",
+  fontWeight: "bold",
+  color: "#ff7043",
+  letterSpacing: "0.5px",
+};
+
+const textFieldStyle = {
+  "& .MuiInputLabel-root": { color: "black" },
+  "& .MuiOutlinedInput-root": {
+    "& > fieldset": { borderColor: "black" },
+  },
+  "& .MuiOutlinedInput-root:hover": {
+    "& > fieldset": { borderColor: "black" },
+  },
+  "& .MuiOutlinedInput-root.Mui-focused": {
+    "& > fieldset": { borderColor: "black" },
+  },
+  input: { color: "black" }
+};
+
+const buttonStyle = {
+  mt: 3,
+  mb: 2,
+  py: 1.5,
+  fontSize: "1rem",
+  fontWeight: "bold",
+  textTransform: "none",
+  bgcolor: "#ff7043",
+  color: "white",
+  boxShadow: "0 3px 5px 2px rgba(255, 105, 135, .3)",
+  "&:hover": {
+    bgcolor: "#ff8a65",
+    boxShadow: "0 3px 5px 2px rgba(255, 105, 135, .5)",
+  },
+  transition: "all 0.3s ease-in-out",
+};
+
+const linkStyle = {
+  color: "#ff7043",
+};
+
+const copyrightStyle = {
+  mt: 5,
+  color: "black",
+};
 
 function Copyright(props) {
   return (
@@ -26,8 +102,6 @@ function Copyright(props) {
     </Typography>
   );
 }
-
-const defaultTheme = createTheme();
 
 export default function Register() {
   const [loading, setLoading] = React.useState(false);
@@ -43,10 +117,7 @@ export default function Register() {
     const passwordConf = data.get("confirm-password");
 
     try {
-      console.log(password)
-      console.log(passwordConf)
-      if(password != passwordConf)
-      {
+      if (password !== passwordConf) {
         toast.error('Passwords do not match. Please try again.', {
           position: "top-right",
           autoClose: 5000,
@@ -72,88 +143,84 @@ export default function Register() {
   };
 
   return (
-    <ThemeProvider theme={defaultTheme}>
       <Container component="main" maxWidth="xs">
-        <CssBaseline />
-        <Box
-          sx={{
-            marginTop: 8,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
-        >
-          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography component="h1" variant="h5">
-            Register
-          </Typography>
-          <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <TextField
-                  autoComplete="given-name"
-                  name="businessName"
-                  required
-                  fullWidth
-                  id="businessName"
-                  label="Business Name"
-                  autoFocus
-                />
+        <Box sx={containerStyle}>
+          <Box sx={boxStyle}>
+            <Avatar sx={avatarStyle}>
+              <LockOutlinedIcon />
+            </Avatar>
+            <Typography component="h1" variant="h5" sx={typographyStyle}>
+              Register
+            </Typography>
+            <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <TextField
+                    autoComplete="given-name"
+                    name="businessName"
+                    required
+                    fullWidth
+                    id="businessName"
+                    label="Business Name"
+                    autoFocus
+                    sx={textFieldStyle}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    required
+                    fullWidth
+                    id="email"
+                    label="Business Email Address"
+                    name="email"
+                    autoComplete="email"
+                    sx={textFieldStyle}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    required
+                    fullWidth
+                    name="new-password"
+                    label="Password"
+                    type="password"
+                    id="newPassword"
+                    autoComplete="new-password"
+                    sx={textFieldStyle}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    required
+                    fullWidth
+                    name="confirm-password"
+                    label="Confirm Password"
+                    type="password"
+                    id="confirmPassword"
+                    autoComplete="new-password"
+                    sx={textFieldStyle}
+                  />
+                </Grid>
               </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  id="email"
-                  label="Business Email Address"
-                  name="email"
-                  autoComplete="email"
-                />
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={buttonStyle}
+              >
+                {loading ? "Loading..." : "Sign Up"}
+              </Button>
+              <Grid container justifyContent="flex-end">
+                <Grid item>
+                  <Link href="/login" variant="body2" sx={linkStyle}>
+                    Already have an account? Sign in
+                  </Link>
+                </Grid>
               </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  name="new-password"
-                  label="Password"
-                  type="password"
-                  id="newPassword"
-                  autoComplete="new-password"
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  required
-                  fullWidth
-                  name="confirm-password"
-                  label="Confirm Password"
-                  type="password"
-                  id="confirmPassword"
-                  autoComplete="new-password"
-                />
-              </Grid>
-            </Grid>
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-            >
-              {loading ? "Loading..." : "Sign Up"}
-            </Button>
-            <Grid container justifyContent="flex-end">
-              <Grid item>
-                <Link href="/login" variant="body2">
-                  Already have an account? Sign in
-                </Link>
-              </Grid>
-            </Grid>
+            </Box>
           </Box>
+          <Copyright sx={copyrightStyle} />
         </Box>
-        <Copyright sx={{ mt: 5 }} />
       </Container>
-    </ThemeProvider>
   );
 }

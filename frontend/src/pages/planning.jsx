@@ -5,17 +5,18 @@ import {
   Typography,
   TextField,
   InputAdornment,
+  Button,
 } from "@mui/material";
-import MapBox from "../components/MapBox";
-import AppBar from "../components/HamburgerBox";
 import { Business, People, Place } from "@mui/icons-material";
-import Calendar from "../components/Calendar";
-import TimePicker from "../components/Time";
-import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
+import AppBar from "../components/HamburgerBox";
+import MapBox from "../components/MapBox";
+import Calendar from "../components/Calendar";
+import TimePicker from "../components/Time";
+import postService from "../services/postService";
 
-export default function Planning() {
+const Planning = () => {
   const [coordinates, setCoordinates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -34,66 +35,49 @@ export default function Planning() {
 
   const handleClick = async () => {
     const formData = {
-      business: parseInt(businessUnit, 10), // Ensure this is an integer
-      unit: parseInt(authorisedVendors, 10), // Ensure this is an integer
-      service_date: selectedDate.format("YYYY-MM-DD"), // Adjust the date format
-      service_start_time: selectedStartTime.format("HH:mm:ss"), // Adjust the time format
-      service_end_time: selectedEndTime.format("HH:mm:ss"), // Adjust the time format
-      location_coords: `${LocationCords.lat},${LocationCords.lng}`, // Format to "lat,lng"
-      location_address: areas, // Assuming areas is the address
+      business: parseInt(businessUnit, 10),
+      unit: parseInt(authorisedVendors, 10),
+      service_date: selectedDate.format("YYYY-MM-DD"),
+      service_start_time: selectedStartTime.format("HH:mm:ss"),
+      service_end_time: selectedEndTime.format("HH:mm:ss"),
+      location_coords: `${LocationCords.lat},${LocationCords.lng}`,
+      location_address: areas,
     };
-  
+
     console.log(formData);
-  
-    try {
-      const response = await api.post('/api/service/', formData);
-      if (response.status === 201) {
-        console.log("Service created successfully:", response.data);
-        navigate("/services", { state: { formData } });
-      } else {
-        console.error("Error creating service:", response.status, response.data);
-      }
-    } catch (error) {
-      console.error("Error creating service:", error);
+
+    const result = await postService(formData);
+    if (result) {
+      navigate("/services", { state: { formData } });
     }
   };
 
   const handleStartTimeChange = (time) => {
-    console.log(time?.format("HH:mm"));
     setSelectedStartTime(time);
   };
 
   const handleEndTimeChange = (time) => {
-    console.log(time?.format("HH:mm"));
     setSelectedEndTime(time);
   };
 
   const handleDateChange = (date) => {
-    console.log(date?.format("ddd, DD/MM/YYYY"));
     setSelectedDate(date);
   };
-  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const host = import.meta.env.VITE_API_URL;
-        console.log(host)
-        if(selectedDate && selectedStartTime && selectedEndTime)
-        {
-          console.log(`${host}get_busyness_scores/?datetime=${selectedDate.format("YYYY-MM-DD")}%20${selectedStartTime.format("HH:mm:ss")}`);
+        if (selectedDate && selectedStartTime && selectedEndTime) {
           const response = await api.get(`/api/busyness_score/?datetime=${selectedDate.format("YYYY-MM-DD")}%20${selectedStartTime.format("HH:mm:ss")}`);
-          console.log(response)
           if (!response.ok) {
             throw new Error("Network response was not ok " + response.statusText);
           }
-          const textData = await response.text(); // Fetch as text
+          const textData = await response.text();
           let data;
-          console.log(data)
 
           try {
-            data = JSON.parse(textData); 
-            console.log(data)
-
+            data = JSON.parse(textData);
           } catch (error) {
             console.error("Error parsing JSON:", error);
             return;
@@ -101,7 +85,6 @@ export default function Planning() {
 
           if (typeof data === "string") {
             data = JSON.parse(data);
-            console.log(data)
           }
           const features = data.features;
           const filteredData = features.map((item) => ({
@@ -120,9 +103,32 @@ export default function Planning() {
     fetchData();
   }, [selectedDate, selectedStartTime, selectedEndTime]);
 
-  useEffect(() => {
-    console.log(coordinates); 
-  }, [coordinates]);
+  const formContainerStyle = {
+    top: "75px",
+    left: "20px",
+    height: "auto",
+    width: "20vw",
+    minWidth: "250px",
+    borderRadius: "20px",
+    p: 3,
+    position: "absolute",
+    zIndex: 1,
+    backdropFilter: "blur(30px)",
+  };
+
+  const inputFieldStyle = {
+    mb: 2,
+  };
+
+  const submitButtonStyle = {
+    color: "white",
+    bgcolor: "orangered",
+    display: "flex",
+    justifyContent: "center",
+    mt: "10px",
+    textAlign: "center",
+    width: "100%",
+  };
 
   return (
     <Box>
@@ -131,28 +137,15 @@ export default function Planning() {
         sx={{
           width: "100vw",
           height: "100vh",
-          m: '-10px',
-          position:'absolute',
-          zIndex:'0'
+          m: "-10px",
+          position: "absolute",
+          zIndex: "0",
         }}
       >
-        <MapBox initialHeatMapCor={coordinates} addZoomLocations={addLocationCords}/>
+        <MapBox initialHeatMapCor={coordinates} addZoomLocations={addLocationCords} />
       </Grid>
 
-      <Box
-        sx={{
-          top: "75px",
-          left: "20px",
-          height: "auto",
-          width: "20vw",
-          minWidth: "250px",
-          bgcolor: "white",
-          borderRadius: "20px",
-          p: 3,
-          position:'absolute',
-          zIndex:'1'
-        }}
-      >
+      <Box sx={formContainerStyle}>
         <Typography variant="h5" sx={{ mb: 2, color: "orangered" }}>
           Plan A Service
         </Typography>
@@ -175,7 +168,7 @@ export default function Planning() {
               </InputAdornment>
             ),
           }}
-          sx={{ mb: 2 }}
+          sx={inputFieldStyle}
         />
 
         <TextField
@@ -190,8 +183,9 @@ export default function Planning() {
               </InputAdornment>
             ),
           }}
-          sx={{ mb: 2 }}
+          sx={inputFieldStyle}
         />
+
         <TextField
           fullWidth
           label="Authorised Vendors"
@@ -204,18 +198,11 @@ export default function Planning() {
               </InputAdornment>
             ),
           }}
-          sx={{ mb: 2 }}
+          sx={inputFieldStyle}
         />
+
         <Button
-          sx={{
-            color: "white",
-            bgcolor: "orangered",
-            display: "flex", 
-            justifyContent: "center",
-            mt: "10px",
-            textAlign: "center",
-            width: "100%",
-          }}
+          sx={submitButtonStyle}
           variant="contained"
           onClick={handleClick}
         >
@@ -224,4 +211,6 @@ export default function Planning() {
       </Box>
     </Box>
   );
-}
+};
+
+export default Planning;
