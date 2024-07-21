@@ -1,4 +1,4 @@
-from app01.models import Business,BusinessUnit,Vendor,Service,Log,ServiceVendor,ZonedStreet,Restriction,BusynessScore,Event
+from app01.models import Business,BusinessUnit,Vendor,Service,Log,ServiceVendor,ZonedStreet,Restriction,ZoneBusynessScore,Event
 from rest_framework import serializers
 from django.contrib.gis.geos import Point
 from django.contrib.gis.geos import MultiPolygon, Polygon, MultiLineString, LineString
@@ -91,9 +91,9 @@ class RestrictionSerializer(serializers.ModelSerializer):
 
 
 
-class BusynessScoreSerializer(serializers.ModelSerializer):
+class ZoneBusynessScoreSerializer(serializers.ModelSerializer):
     class Meta:
-        model = BusynessScore
+        model = ZoneBusynessScore
         fields = ['score','zone','hour','centroid']
 
 

@@ -5,7 +5,7 @@ import pandas as pd
 import geopandas as gpd
 from django.conf import settings
 import os
-from ..models import BusynessScore,StreetBusynessScore
+from ..models import ZoneBusynessScore,StreetBusynessScore
 # import csv
 
 def connect_to_postgres(query=None):
@@ -19,7 +19,7 @@ def connect_to_postgres(query=None):
         # Assuming the query is a Django ORM filter query in string form
         # e.g., "score__gt=5" to filter scores greater than 5
         filters = {key: value for key, value in [item.split('=') for item in query.split(',')]}
-        busyness_scores = BusynessScore.objects.filter(**filters)
+        busyness_scores = ZoneBusynessScore.objects.filter(**filters)
     elif query ==1:#dont run this lol
         print("connect to db precalculated table")
         busyness_scores = StreetBusynessScore.objects.all()
@@ -27,7 +27,7 @@ def connect_to_postgres(query=None):
     else:
         # print("else")
         # Otherwise, return all records
-        busyness_scores = BusynessScore.objects.all()
+        busyness_scores = ZoneBusynessScore.objects.all()
         # print(busyness_scores)
 
     rows = list(busyness_scores.values())
