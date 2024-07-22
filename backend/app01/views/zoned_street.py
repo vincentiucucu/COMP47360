@@ -14,8 +14,8 @@ class ZonedStreetView(ModelViewSet):
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
     filterset_class = ZonedStreetFilter
 
-    search_fields = ['street_address', 'zone_name']
-    ordering_fields = ['zoned_street_id', 'street_address', 'zone_name']
+    search_fields = ['street_address', 'zone_id']
+    ordering_fields = ['zoned_street_id', 'street_address', 'zone_id']
     ordering = ['-zoned_street_id']
     pagination_class = Pagination
 
