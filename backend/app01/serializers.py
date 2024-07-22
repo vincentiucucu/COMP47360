@@ -29,7 +29,6 @@ class VendorSerializer(serializers.ModelSerializer):
         read_only_fields = ['business']
 
 
-
 class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Service
@@ -110,7 +109,7 @@ class ZoneBusynessScoreSerializer(serializers.ModelSerializer):
 class ZonedStreetSerializer(serializers.ModelSerializer):
     class Meta:
         model = ZonedStreet
-        fields =['street_address','street_geometry','street_centroid','zone_id','zone_name','zone_geometry']
+        fields = ['street_address','street_geometry','street_centroid','zone_id']
 
     def to_internal_value(self, data):
         street_centroid = data.get('street_centroid')
@@ -135,20 +134,6 @@ class ZonedStreetSerializer(serializers.ModelSerializer):
             except (ValueError, TypeError):
                 raise serializers.ValidationError({
                     'street_geometry': 'Invalid format for street_geometry. It should be a list of linestrings.'
-                })
-
-        zone_geometry = data.get('zone_geometry')
-
-        if zone_geometry:
-            try:
-                polygons = []
-                for polygon_data in zone_geometry:
-                    polygon = Polygon(polygon_data)
-                    polygons.append(polygon)
-                data['zone_geometry'] = MultiPolygon(*polygons)
-            except (ValueError, TypeError):
-                raise serializers.ValidationError({
-                    'zone_geometry': 'Invalid format for zone_geometry. It should be a list of polygons.'
                 })
 
         return super().to_internal_value(data)
