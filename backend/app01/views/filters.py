@@ -1,5 +1,5 @@
 import django_filters
-from app01.models import BusinessUnit,Vendor,Service,Log,ZonedStreet,ZoneBusynessScore,Restriction,Event
+from app01.models import BusinessUnit,Vendor,Service,Log,ZonedStreet,ZoneBusynessScore,Restriction,Event,StreetBusynessScore,TaxiZone
 from django.contrib.gis.geos import Point, MultiPolygon, MultiLineString
 from django.contrib.gis.measure import D
 from django.core.exceptions import ValidationError
@@ -178,7 +178,7 @@ class ZonedStreetFilter(django_filters.FilterSet):
         try:
             lat, lng = map(float, value.split(','))
             point = Point(lng, lat)
-            return queryset.filter(street_centroid=point)
+            return queryset.filter(street_centroid__distance_lte=(point, D(m=10)))
         except Exception as e:
             raise ValidationError(f'Invalid centroid format: {e}')
 
@@ -250,11 +250,13 @@ GET http://example.com/api/restriction/?restriction_street_geometry=MULTILINESTR
 '''
 
 
-class BusynessScoreFilter(django_filters.FilterSet):
+class ZoneBusynessScoreFilter(django_filters.FilterSet):
     score_gt = django_filters.NumberFilter(field_name='score', lookup_expr='gt')
     score_lt = django_filters.NumberFilter(field_name='score', lookup_expr='lt')
     zone = django_filters.NumberFilter()
     hour = django_filters.DateTimeFromToRangeFilter()
+    hour_exact = django_filters.DateTimeFilter(field_name='hour', lookup_expr='exact')
+
     centroid = django_filters.CharFilter(method='filter_centroid')
 
     class Meta:
@@ -266,8 +268,8 @@ class BusynessScoreFilter(django_filters.FilterSet):
     def filter_centroid(self, queryset, name, value):
         try:
             lat, lng = map(float, value.split(','))
-            point = Point(lng, lat, srid=4326)
-            return queryset.filter(centroid=point)
+            point = Point(lng, lat)
+            return queryset.filter(centroid__distance_lte=(point, D(m=10)))
         except Exception as e:
             raise ValidationError(f'Invalid centroid format: {e}')
 
@@ -281,8 +283,38 @@ GET http://example.com/api/busyness_score/?zone=1
 
 GET http://example.com/api/busyness_score/?hour_after=2024-07-01T00:00:00&hour_before=2024-07-07T23:59:59
 
+GET http://example.com/api/busyness_score/?hour_exact=2024-05-01T01:00:00
+
 GET http://example.com/api/busyness_score/?centroid=40.7128,-74.0060
 
+
+'''
+
+class StreetBusynessScoreFilter(django_filters.FilterSet):
+    score_gt = django_filters.NumberFilter(field_name='score', lookup_expr='gt')
+    score_lt = django_filters.NumberFilter(field_name='score', lookup_expr='lt')
+    hour = django_filters.DateTimeFromToRangeFilter()
+    zoned_street_centroid = django_filters.CharFilter(method='filter_zoned_street_centroid')
+
+    class Meta:
+        model = StreetBusynessScore
+        fields = ['score_gt', 'score_lt',  'hour', 'zoned_street_centroid']
+
+    def filter_zoned_street_centroid(self, queryset, name, value):
+        try:
+            lat, lng = map(float, value.split(','))
+            point = Point(lng, lat)
+            return queryset.filter(zoned_street_centroid__distance_lte=(point, D(m=10)))
+        except Exception as e:
+            raise ValidationError(f'Invalid zoned_street_centroid format: {e}')
+'''
+http://example.com/api/street_busyness_score/?score_gt=5&score_lt=10
+
+http://example.com//api/street_busyness_score/?hour_after=2024-07-01T00:00:00&hour_before=2024-07-07T23:59:59
+
+http://example.com/api/street_busyness_score/?zone_id=1
+
+http://example.com/api/street_busyness_score/?zoned_street_centroid=40.7128,-74.0060
 
 '''
 
@@ -302,7 +334,7 @@ class EventFilter(django_filters.FilterSet):
     def filter_location(self, queryset, name, value):
         try:
             lat, lng = map(float, value.split(','))
-            point = Point(lng, lat, srid=4326)
+            point = Point(lng, lat)
             return queryset.filter(location=point)
         except Exception as e:
             raise ValidationError(f'Invalid location format: {e}')
@@ -317,5 +349,34 @@ GET http://example.com/api/event/?start_after=2024-08-10T00:00:00&start_before=2
 GET http://example.com/api/event/?end_after=2024-08-10T00:00:00&start_before=2024-08-20T23:59:59
 
 GET http://example.com/api/event/?location=40.7128,-74.0060
+
+'''
+
+class TaxiZoneFilter(django_filters.FilterSet):
+    zone_name = django_filters.CharFilter(lookup_expr='icontains')
+    zone_id = django_filters.NumberFilter()
+    zone_geometry = django_filters.CharFilter(method='filter_zone_geometry')
+
+    class Meta:
+        model = TaxiZone
+        fields = ['zone_name', 'zone_id', 'zone_geometry']
+
+    def filter_zone_geometry(self, queryset, name, value):
+        try:
+            lat, lng = map(float, value.split(','))
+            point = Point(lng, lat)
+            return queryset.filter(zone_geometry__distance_lte=(point, D(km=10)))
+        except Exception as e:
+            raise ValidationError(f'Invalid zone_geometry format: {e}')
+
+'''
+GET http://example.com/api/taxi_zones/?zone_name=Central
+
+GET http://example.com/api/taxi_zones/?zone_id=1
+
+GET http://example.com/api/taxi_zones/?zone_geometry=40.7128,-74.0060
+
+combined filter
+GET http://example.com/api/taxi_zones/?zone_name=Central&zone_id=1&zone_geometry=40.7128,-74.0060
 
 '''

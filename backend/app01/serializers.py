@@ -1,6 +1,7 @@
-from app01.models import Business,BusinessUnit,Vendor,Service,Log,ServiceVendor,ZonedStreet,Restriction,ZoneBusynessScore,Event
+from app01.models import Business,BusinessUnit,Vendor,Service,Log,ServiceVendor,ZonedStreet,Restriction,ZoneBusynessScore,StreetBusynessScore,Event,TaxiZone
 from rest_framework import serializers
-from django.contrib.gis.geos import Point, MultiPolygon, Polygon, MultiLineString, LineString
+from django.contrib.gis.geos import Point
+from django.contrib.gis.geos import MultiPolygon, Polygon, MultiLineString, LineString
 
 class BusinessSerializer(serializers.ModelSerializer):
     
@@ -15,24 +16,28 @@ class BusinessSerializer(serializers.ModelSerializer):
         return Business.objects.create_user(**validated_data)
 
 
+
+
+
 class BusinessUnitSerializer(serializers.ModelSerializer):
     class Meta:
         model = BusinessUnit
-        fields = ['permit_id', 'unit_name', 'unit_type', 'permit_expiry_date', "business"]
-        read_only_fields = ['business']
+        fields = ['permit_id','unit_name', 'unit_type','permit_expiry_date','business']
+
+
 
 
 class VendorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Vendor
-        fields = ['licence_id', 'vendor_name', 'licence_expiry_date', 'vendor_email', 'vendor_phone_number', 'business']
-        read_only_fields = ['business']
+        fields = ['business','vendor_name','licence_id','licence_expiry_date','vendor_email','vendor_phone_number' ]
+
 
 
 class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Service
-        fields = ['business','unit','service_date','service_start_time','service_end_time','location_coords','location_address']
+        fields = ['business','unit','service_date','service_start_time','service_end_time','location_coords','location_address','business','unit']
 
     def to_internal_value(self, data):
         location_coords = data.get('location_coords')
@@ -50,7 +55,7 @@ class ServiceSerializer(serializers.ModelSerializer):
 class LogSerializer(serializers.ModelSerializer):
     class Meta:
         model = Log
-        fields = ['business','operation','entity','entity_id','description','timestamp']
+        fields = ['operation','entity','entity_id','description','timestamp','business']
 
 
 class ServiceVendorSerializer(serializers.ModelSerializer):
@@ -91,8 +96,6 @@ class ZoneBusynessScoreSerializer(serializers.ModelSerializer):
         model = ZoneBusynessScore
         fields = ['score','zone','hour','centroid']
 
-
-
     def to_internal_value(self, data):
         centroid = data.get('centroid')
         if centroid:
@@ -109,7 +112,7 @@ class ZoneBusynessScoreSerializer(serializers.ModelSerializer):
 class ZonedStreetSerializer(serializers.ModelSerializer):
     class Meta:
         model = ZonedStreet
-        fields = ['street_address','street_geometry','street_centroid','zone_id']
+        fields =['street_address','street_geometry','street_centroid','zone_id']
 
     def to_internal_value(self, data):
         street_centroid = data.get('street_centroid')
@@ -136,8 +139,39 @@ class ZonedStreetSerializer(serializers.ModelSerializer):
                     'street_geometry': 'Invalid format for street_geometry. It should be a list of linestrings.'
                 })
 
+        zone_geometry = data.get('zone_geometry')
+
+        if zone_geometry:
+            try:
+                polygons = []
+                for polygon_data in zone_geometry:
+                    polygon = Polygon(polygon_data)
+                    polygons.append(polygon)
+                data['zone_geometry'] = MultiPolygon(*polygons)
+            except (ValueError, TypeError):
+                raise serializers.ValidationError({
+                    'zone_geometry': 'Invalid format for zone_geometry. It should be a list of polygons.'
+                })
+
         return super().to_internal_value(data)
 
+
+class StreetBusynessScoreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StreetBusynessScore
+        fields = ['zoned_street_centroid', 'hour', 'score', 'zone_id']
+
+    def to_internal_value(self, data):
+        zoned_street_centroid = data.get('zoned_street_centroid')
+        if zoned_street_centroid:
+            try:
+                lat, lng = map(float, zoned_street_centroid.split(','))
+                data['zoned_street_centroid'] = Point(lng, lat)
+            except (ValueError, TypeError):
+                raise serializers.ValidationError({
+                    'zoned_street_centroid': 'Invalid format for zoned_street_centroid. It should be "lat,lng".'
+                })
+        return super().to_internal_value(data)
 
 class EventSerializer(serializers.ModelSerializer):
     class Meta:
@@ -153,5 +187,26 @@ class EventSerializer(serializers.ModelSerializer):
             except (ValueError, TypeError):
                 raise serializers.ValidationError({
                     'location': 'Invalid format for location. It should be "lat,lng".'
+                })
+        return super().to_internal_value(data)
+
+
+class TaxiZoneSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TaxiZone
+        fields = ['zone_id', 'zone_name', 'zone_geometry']
+
+    def to_internal_value(self, data):
+        zone_geometry = data.get('zone_geometry')
+        if zone_geometry:
+            try:
+                polygons = []
+                for polygon_data in zone_geometry:
+                    polygon = Polygon(polygon_data)
+                    polygons.append(polygon)
+                data['zone_geometry'] = MultiPolygon(*polygons)
+            except (ValueError, TypeError):
+                raise serializers.ValidationError({
+                    'zone_geometry': 'Invalid format for zone_geometry. It should be a list of polygons.'
                 })
         return super().to_internal_value(data)

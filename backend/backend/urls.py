@@ -17,9 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from app01.view import RegisterBusinessView, get_busyness_scores, get_recommendations_view
 from rest_framework.routers import DefaultRouter
-from app01.views import business_unit, log, service, vendor,serviceVendor,zoned_street,restriction,busyness_score,event
+from app01.view import RegisterBusinessView, get_busyness_scores, get_recommendations_view
+
+from app01.views import business_unit, log, service, vendor,serviceVendor,zoned_street,restriction,zone_busyness_score,event,street_bustness_score,taxi_zone
 from rest_framework.documentation import include_docs_urls
 from rest_framework.permissions import AllowAny
 
@@ -31,8 +32,10 @@ router.register(prefix='log', viewset=log.LogView, basename='log')
 router.register(prefix='serviceVendor',viewset=serviceVendor.ServiceVendorView,basename='serviceVendor')
 router.register(prefix='zoned_street',viewset=zoned_street.ZonedStreetView,basename='zoned_street')
 router.register(prefix='restriction',viewset=restriction.RestrictionView,basename='restriction')
-router.register(prefix='busyness_score',viewset=busyness_score.BusynessScoreView,basename='busynessScore')
+router.register(prefix='zone_busyness_score',viewset=zone_busyness_score.ZoneBusynessScoreView,basename='busynessScore')
+router.register(prefix='street_busyness_score',viewset=street_bustness_score.StreetBusynessScoreView,basename='street_busyness_score')
 router.register(prefix='event',viewset=event.EventView,basename='event')
+router.register(prefix='taxi_zone',viewset=taxi_zone.TaxiZoneView,basename='taxi_zone')
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -43,6 +46,6 @@ urlpatterns = [
     path('docs/', include_docs_urls(title='Drf api', description='xxx',permission_classes=[AllowAny])),
     path('get_busyness_scores/', get_busyness_scores, name='get_busyness_scores'),
     path('get_recommendations/', get_recommendations_view, name='get_recommendations'),
-    
+
     path("api/", include(router.urls)),
 ]

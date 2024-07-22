@@ -1,28 +1,28 @@
-from rest_framework import permissions
-from rest_framework.viewsets import ModelViewSet
-from rest_framework.exceptions import PermissionDenied
-from rest_framework.filters import OrderingFilter, SearchFilter
-from rest_framework.decorators import action
-from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-
+from rest_framework.viewsets import ModelViewSet
 from app01.models import Vendor
-from app01.serializers import VendorSerializer
+from rest_framework import permissions
 
+from app01.serializers import VendorSerializer
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.filters import OrderingFilter,SearchFilter
 from app01.views.pagination import Pagination
 from app01.views.filters import VendorFilter
-
-from datetime import timedelta, datetime
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from datetime import timedelta,datetime
 from django.utils.timezone import now
 
 class VendorView(ModelViewSet):
+
+    queryset = Vendor.objects.all()
     serializer_class = VendorSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     filter_backends = [DjangoFilterBackend, OrderingFilter,SearchFilter]
     filterset_class = VendorFilter
 
-    search_fields = ['licence_id', 'vendor_name', 'vendor_email', 'vendor_phone_number']
+    search_fields = ['^vendor_name', '=licence_id', '@vendor_email', 'vendor_phone_number']
     # GET /api/vendor /?search = John
     '''
     search John in the all fields in search_fields
@@ -46,11 +46,11 @@ class VendorView(ModelViewSet):
     def get_queryset(self):
         # Ensure businesses only see their own vendors
         return Vendor.objects.filter(business=self.request.user)
-    
+
     def perform_create(self, serializer):
         # Set the business field to the authenticated business when adding a new vendor
         serializer.save(business=self.request.user)
-    
+
     def perform_update(self, serializer):
         # Ensure users can only update their own vendors
         if serializer.instance.business != self.request.user:
@@ -63,7 +63,6 @@ class VendorView(ModelViewSet):
             raise PermissionDenied("You do not have permission to remove this vendor.")
         instance.delete()
 
-
     # GET  http://127.0.0.1:8000/api/vendor/recent/?days=1
     @action(detail=False, methods=['get'])
     def recent(self, request):
@@ -75,6 +74,30 @@ class VendorView(ModelViewSet):
         start_date = now() - timedelta(days=days)
         recent_events = self.queryset.filter(licence_expiry_date__gte=start_date, licence_expiry_date__lte=now()).order_by('-licence_expiry_date')
         serializer = self.get_serializer(recent_events, many=True)
+        return Response(serializer.data)
+
+    # http://127.0.0.1:8000/api/vendor/today
+    @action(detail=False, methods=['get'])
+    def today(self, request):
+        start_date = datetime.combine(now().date(), datetime.min.time())
+        end_date = datetime.combine(now().date(), datetime.max.time())
+        today_events = self.queryset.filter(licence_expiry_date__gte=start_date, licence_expiry_date__lte=end_date).order_by('licence_expiry_date')
+        serializer = self.get_serializer(today_events, many=True)
+        return Response(serializer.data)
+
+
+
+    # GET  http://127.0.0.1:8000/api/vendor/future/?days=1
+    @action(detail=False, methods=['get'])
+    def future(self, request):
+        days = request.query_params.get('days', 7)
+        try:
+            days = int(days)
+        except ValueError:
+            return Response({'error': 'Invalid value for days'})
+        end_date = now() + timedelta(days=days)
+        recent_vendors = self.queryset.filter(licence_expiry_date__lte=end_date, licence_expiry_date__gte=now()).order_by('licence_expiry_date')[:10]
+        serializer = self.get_serializer(recent_vendors, many=True)
         return Response(serializer.data)
 
 # Example of return results based on Pagination

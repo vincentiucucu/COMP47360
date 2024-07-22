@@ -40,7 +40,7 @@ class ServiceView(ModelViewSet):
         return Response(serializer.data)
 
     ''''
-    'recent' function filter the 'service_date' form past to now based on the range days you give
+    'recent' function filter the 'service_date' form past to now based on the range of days you give
     '''
 
     # http://127.0.0.1:8000/api/service/today
@@ -71,5 +71,5 @@ class ServiceView(ModelViewSet):
         return Response(serializer.data)
 
     ''''
-    'future' function filter the 'service_date' form now to the future based on the days you give
+    'future' function filter the 'service_date' form now to the future based on range of the days you give
     '''
