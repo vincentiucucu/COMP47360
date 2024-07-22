@@ -57,7 +57,7 @@ class BusinessUnitView(ModelViewSet):
         try:
             days = int(days)
         except ValueError:
-            return Response({'error': 'Invalid value for days'}, status=400)
+            return Response({'error': 'Invalid value for days'})
         start_date = now().date() - timedelta(days=days)
         recent_units = self.queryset.filter(permit_expiry_date__gte=start_date,
                                             permit_expiry_date__lte=now().date()).order_by('-permit_expiry_date')
@@ -87,7 +87,7 @@ class BusinessUnitView(ModelViewSet):
         try:
             days = int(days)
         except ValueError:
-            return Response({'error': 'Invalid value for days'}, status=400)
+            return Response({'error': 'Invalid value for days'})
         end_date = now().date() + timedelta(days=days)
         future_units = self.queryset.filter(permit_expiry_date__lte=end_date,
                                             permit_expiry_date__gte=now().date()).order_by('permit_expiry_date')
