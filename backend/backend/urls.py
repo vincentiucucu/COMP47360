@@ -20,7 +20,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from app01.view import RegisterBusinessView, get_busyness_scores, get_recommendations_view
 from rest_framework.routers import DefaultRouter
 from app01.views import business_unit, log, service, vendor,serviceVendor,zoned_street,restriction,busyness_score,event
-from drf_spectacular.views import SpectacularSwaggerView
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 from rest_framework.permissions import AllowAny
 
@@ -44,6 +44,7 @@ urlpatterns = [
     path('get_busyness_scores/', get_busyness_scores, name='get_busyness_scores'),
     path('get_recommendations/', get_recommendations_view, name='get_recommendations'),
     path("api/", include(router.urls)),
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('service/geojson/', service.ServiceView.as_view({'get': 'geojson'}), name='service-geojson')
     
