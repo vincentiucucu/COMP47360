@@ -18,6 +18,7 @@ import Dashboard from "./pages/dashboard";
 import NotFound from "./pages/notFound";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 function logout() {
   localStorage.clear();
@@ -31,27 +32,12 @@ function RegisterAndlogout() {
 
 function App() {
   return (
-    <div>
+    <ErrorBoundary>
       <BrowserRouter>
         <Routes>
-          <Route
-            path="/"
-            element={
-                <Home />
-            }
-          />
-          <Route
-            path="/login"
-            element={
-                <LogIn />
-            }
-          />
-          <Route
-            path="/register"
-            element={
-                <Register />
-            }
-          />
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<LogIn />} />
+          <Route path="/register" element={<Register />} />
           <Route
             path="/services"
             element={
@@ -88,7 +74,7 @@ function App() {
         </Routes>
       </BrowserRouter>
       <ToastContainer />
-    </div>
+    </ErrorBoundary>
   );
 }
 

@@ -8,10 +8,13 @@ import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
+import CircularProgress from '@mui/material/CircularProgress';
 import { useNavigate } from 'react-router-dom';
 import { register } from '../services/postRegister';
 import { toast } from 'react-toastify';
-import '../styles/Register.scss'
+import 'react-toastify/dist/ReactToastify.css';
+import '../styles/Register.scss';
+import CustomToast from '../components/CustomToast'
 
 const containerStyle = {
   bgcolor: 'white',
@@ -20,74 +23,74 @@ const containerStyle = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  flexDirection:'column',
+  flexDirection: 'column',
 };
 
 const boxStyle = {
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  animation: "fadeIn 1s ease-in-out",
-  color: "white",
-  padding: "20px",
-  borderRadius: "10px",
-  boxShadow: "0px 0px 100px 15px #ff7043",
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  animation: 'fadeIn 1s ease-in-out',
+  color: 'white',
+  padding: '20px',
+  borderRadius: '10px',
+  boxShadow: '0px 0px 100px 15px #ff7043',
   backdropFilter: 'blur(5px)',
 };
 
 const avatarStyle = {
   m: 1,
-  bgcolor: "#ff7043",
+  bgcolor: '#ff7043',
   width: 56,
   height: 56,
-  animation: "bounce 1s infinite",
+  animation: 'bounce 1s infinite',
 };
 
 const typographyStyle = {
   fontFamily: "'Roboto', sans-serif",
-  fontWeight: "bold",
-  color: "#ff7043",
-  letterSpacing: "0.5px",
+  fontWeight: 'bold',
+  color: '#ff7043',
+  letterSpacing: '0.5px',
 };
 
 const textFieldStyle = {
-  "& .MuiInputLabel-root": { color: "black" },
-  "& .MuiOutlinedInput-root": {
-    "& > fieldset": { borderColor: "black" },
+  '& .MuiInputLabel-root': { color: 'black' },
+  '& .MuiOutlinedInput-root': {
+    '& > fieldset': { borderColor: 'black' },
   },
-  "& .MuiOutlinedInput-root:hover": {
-    "& > fieldset": { borderColor: "black" },
+  '& .MuiOutlinedInput-root:hover': {
+    '& > fieldset': { borderColor: 'black' },
   },
-  "& .MuiOutlinedInput-root.Mui-focused": {
-    "& > fieldset": { borderColor: "black" },
+  '& .MuiOutlinedInput-root.Mui-focused': {
+    '& > fieldset': { borderColor: 'black' },
   },
-  input: { color: "black" }
+  input: { color: 'black' },
 };
 
 const buttonStyle = {
   mt: 3,
   mb: 2,
   py: 1.5,
-  fontSize: "1rem",
-  fontWeight: "bold",
-  textTransform: "none",
-  bgcolor: "#ff7043",
-  color: "white",
-  boxShadow: "0 3px 5px 2px rgba(255, 105, 135, .3)",
-  "&:hover": {
-    bgcolor: "#ff8a65",
-    boxShadow: "0 3px 5px 2px rgba(255, 105, 135, .5)",
+  fontSize: '1rem',
+  fontWeight: 'bold',
+  textTransform: 'none',
+  bgcolor: '#ff7043',
+  color: 'white',
+  boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .3)',
+  '&:hover': {
+    bgcolor: '#ff8a65',
+    boxShadow: '0 3px 5px 2px rgba(255, 105, 135, .5)',
   },
-  transition: "all 0.3s ease-in-out",
+  transition: 'all 0.3s ease-in-out',
 };
 
 const linkStyle = {
-  color: "#ff7043",
+  color: '#ff7043',
 };
 
 const copyrightStyle = {
   mt: 5,
-  color: "black",
+  color: 'black',
 };
 
 function Copyright(props) {
@@ -108,18 +111,19 @@ export default function Register() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    setLoading(true);
     e.preventDefault();
+    if (loading) return; 
+    setLoading(true);
     const data = new FormData(e.currentTarget);
-    const businessName = data.get("businessName");
-    const businessEmail = data.get("email");
-    const password = data.get("new-password");
-    const passwordConf = data.get("confirm-password");
+    const businessName = data.get('businessName');
+    const businessEmail = data.get('email');
+    const password = data.get('new-password');
+    const passwordConf = data.get('confirm-password');
 
     try {
       if (password !== passwordConf) {
         toast.error('Passwords do not match. Please try again.', {
-          position: "top-right",
+          position: 'top-right',
           autoClose: 5000,
           hideProgressBar: false,
           closeOnClick: true,
@@ -127,100 +131,102 @@ export default function Register() {
           draggable: true,
           progress: undefined,
         });
+        setLoading(false);
         return;
       }
       const res = await register(businessName, businessEmail, password);
       if (res.status >= 200 && res.status < 300) {
-        navigate("/services");
+        navigate('/services');
       } else {
-        navigate("/login");
+        toast(<CustomToast />);
       }
     } catch (error) {
-      alert(error);
+      toast(<CustomToast />);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-      <Container component="main" maxWidth="xs">
-        <Box sx={containerStyle}>
-          <Box sx={boxStyle}>
-            <Avatar sx={avatarStyle}>
-              <LockOutlinedIcon />
-            </Avatar>
-            <Typography component="h1" variant="h5" sx={typographyStyle}>
-              Register
-            </Typography>
-            <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <TextField
-                    autoComplete="given-name"
-                    name="businessName"
-                    required
-                    fullWidth
-                    id="businessName"
-                    label="Business Name"
-                    autoFocus
-                    sx={textFieldStyle}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    required
-                    fullWidth
-                    id="email"
-                    label="Business Email Address"
-                    name="email"
-                    autoComplete="email"
-                    sx={textFieldStyle}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    required
-                    fullWidth
-                    name="new-password"
-                    label="Password"
-                    type="password"
-                    id="newPassword"
-                    autoComplete="new-password"
-                    sx={textFieldStyle}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    required
-                    fullWidth
-                    name="confirm-password"
-                    label="Confirm Password"
-                    type="password"
-                    id="confirmPassword"
-                    autoComplete="new-password"
-                    sx={textFieldStyle}
-                  />
-                </Grid>
+    <Container component="main" maxWidth="xs">
+      <Box sx={containerStyle}>
+        <Box sx={boxStyle}>
+          <Avatar sx={avatarStyle}>
+            <LockOutlinedIcon />
+          </Avatar>
+          <Typography component="h1" variant="h5" sx={typographyStyle}>
+            Register
+          </Typography>
+          <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  autoComplete="given-name"
+                  name="businessName"
+                  required
+                  fullWidth
+                  id="businessName"
+                  label="Business Name"
+                  autoFocus
+                  sx={textFieldStyle}
+                />
               </Grid>
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={buttonStyle}
-              >
-                {loading ? "Loading..." : "Sign Up"}
-              </Button>
-              <Grid container justifyContent="flex-end">
-                <Grid item>
-                  <Link href="/login" variant="body2" sx={linkStyle}>
-                    Already have an account? Sign in
-                  </Link>
-                </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  required
+                  fullWidth
+                  id="email"
+                  label="Business Email Address"
+                  name="email"
+                  autoComplete="email"
+                  sx={textFieldStyle}
+                />
               </Grid>
-            </Box>
+              <Grid item xs={12}>
+                <TextField
+                  required
+                  fullWidth
+                  name="new-password"
+                  label="Password"
+                  type="password"
+                  id="newPassword"
+                  autoComplete="new-password"
+                  sx={textFieldStyle}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  required
+                  fullWidth
+                  name="confirm-password"
+                  label="Confirm Password"
+                  type="password"
+                  id="confirmPassword"
+                  autoComplete="new-password"
+                  sx={textFieldStyle}
+                />
+              </Grid>
+            </Grid>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={buttonStyle}
+              disabled={loading}
+            >
+              {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign Up'}
+            </Button>
+            <Grid container justifyContent="flex-end">
+              <Grid item>
+                <Link href="/login" variant="body2" sx={linkStyle}>
+                  Already have an account? Sign in
+                </Link>
+              </Grid>
+            </Grid>
           </Box>
-          <Copyright sx={copyrightStyle} />
         </Box>
-      </Container>
+        <Copyright sx={copyrightStyle} />
+      </Box>
+    </Container>
   );
 }

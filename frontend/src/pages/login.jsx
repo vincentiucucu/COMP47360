@@ -10,9 +10,13 @@ import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
+import CircularProgress from "@mui/material/CircularProgress";
 import { useNavigate } from "react-router-dom";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { login } from '../services/postLogin';
-import '../styles/Login.scss'
+import '../styles/Login.scss';
+import CustomToast from '../components/CustomToast'
 
 const containerStyle = {
   bgcolor: 'white',
@@ -63,7 +67,6 @@ const textFieldStyle = {
   },
   input: { color: "black" }
 };
-
 
 const formControlLabelStyle = {
   "& .MuiTypography-root": {
@@ -122,8 +125,10 @@ export default function SignIn() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    setLoading(true);
     e.preventDefault();
+    if (loading) return; 
+    setLoading(true);
+    console.log("Form submitted");
     const data = new FormData(e.currentTarget);
     const username = data.get("email");
     const password = data.get("password");
@@ -134,10 +139,10 @@ export default function SignIn() {
       if (res.status >= 200 && res.status < 300) {
         navigate("/services");
       } else {
-        navigate("/login");
+        toast(<CustomToast />);
       }
     } catch (error) {
-      alert(error);
+      toast(<CustomToast />);
     } finally {
       setLoading(false);
     }
@@ -195,8 +200,9 @@ export default function SignIn() {
               fullWidth
               variant="contained"
               sx={buttonStyle}
+              disabled={loading}
             >
-              {loading ? "Loading..." : "Sign In"}
+              {loading ? <CircularProgress size={24} color="inherit" /> : "Sign In"}
             </Button>
             <Grid container>
               <Grid item>
