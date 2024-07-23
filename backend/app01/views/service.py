@@ -1,7 +1,7 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.viewsets import ModelViewSet
 from app01.models import Service
-from app01.serializers import ServiceSerializer
+from app01.serializers import ServiceSerializer, ServiceVendorSerializer, to_geojson
 from rest_framework.filters import OrderingFilter,SearchFilter
 from app01.views.pagination import Pagination
 from app01.views.filters import ServiceFilter
@@ -9,12 +9,15 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from datetime import timedelta,datetime
 from django.utils.timezone import now
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+
 
 
 class ServiceView(ModelViewSet):
-
-    queryset = Service.objects.all()
     serializer_class = ServiceSerializer
+    permission_classes = [IsAuthenticated]
 
     filter_backends = [DjangoFilterBackend, OrderingFilter,SearchFilter]
     filterset_class = ServiceFilter
@@ -25,6 +28,41 @@ class ServiceView(ModelViewSet):
     ordering = ['-service_date', '-service_start_time', '-service_end_time']
 
     pagination_class = Pagination
+
+
+    def get_queryset(self):
+        # Ensure businesses only see their own services
+        return Service.objects.filter(business=self.request.user)
+    
+    def perform_create(self, serializer):
+        serializer.save(business=self.request.user)
+
+    def perform_update(self, serializer):
+        if serializer.instance.business != self.request.user:
+            raise PermissionDenied("You do not have permission to edit this service.")
+        serializer.save(business=self.request.user)
+
+    def perform_destroy(self, instance):
+        if instance.business != self.request.user:
+            raise PermissionDenied("You do not have permission to delete this service.")
+        instance.servicevendor_set.all().delete()
+        instance.delete()
+
+    @action(detail=False, methods=['get'])
+    def geojson(self, request):
+        services = self.get_queryset()
+        features = []
+        for service in services:
+            service_geojson = to_geojson(service)
+            service_geojson['properties']['vendors'] = ServiceVendorSerializer(service.servicevendor_set.all(), many=True).data
+            features.append(service_geojson)
+        
+        geojson = {
+            "type": "FeatureCollection",
+            "features": features
+        }
+        
+        return Response(geojson, status=status.HTTP_200_OK)
 
     # http://127.0.0.1:8000/api/service/recent/?days=1
     @action(detail=False, methods=['get'])

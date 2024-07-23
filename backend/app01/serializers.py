@@ -2,6 +2,24 @@ from app01.models import Business,BusinessUnit,Vendor,Service,Log,ServiceVendor,
 from rest_framework import serializers
 from django.contrib.gis.geos import Point, MultiPolygon, Polygon, MultiLineString, LineString
 
+def to_geojson(service):
+    return {
+        "type": "Feature",
+        "geometry": {
+            "type": "Point",
+            "coordinates": [service.location_coords.x, service.location_coords.y]
+        },
+        "properties": {
+            "service_id": service.service_id,
+            "service_date": service.service_date,
+            "service_start_time": service.service_start_time,
+            "service_end_time": service.service_end_time,
+            "location_address": service.location_address,
+            "revenue": service.revenue,
+            "unit": service.unit.permit_id
+        }
+    }
+
 class BusinessSerializer(serializers.ModelSerializer):
     
     class Meta:
@@ -28,35 +46,51 @@ class VendorSerializer(serializers.ModelSerializer):
         fields = ['licence_id', 'vendor_name', 'licence_expiry_date', 'vendor_email', 'vendor_phone_number', 'business']
         read_only_fields = ['business']
 
+class ServiceVendorSerializer(serializers.ModelSerializer):
+    vendor_name = serializers.CharField(source='vendor.vendor_name', read_only=True)
+    vendor_email = serializers.CharField(source='vendor.vendor_email', read_only=True)
+
+    class Meta:
+        model = ServiceVendor
+        fields = ['service_vendor_id', 'vendor', 'vendor_name', 'vendor_email']
+
 
 class ServiceSerializer(serializers.ModelSerializer):
+    vendors = serializers.ListField(
+        child=serializers.PrimaryKeyRelatedField(queryset=Vendor.objects.all()), write_only=True
+    )
+    service_vendors = ServiceVendorSerializer(source='servicevendor_set', many=True, read_only=True)
+
     class Meta:
         model = Service
-        fields = ['business','unit','service_date','service_start_time','service_end_time','location_coords','location_address']
+        fields = ['service_id', 'service_date', 'service_start_time', 'service_end_time', 'location_coords', 'location_address', 'revenue', 'business', 'unit', 'vendors', 'service_vendors']
+        read_only_fields = ['service_id', 'business', 'service_vendors']
 
-    def to_internal_value(self, data):
-        location_coords = data.get('location_coords')
-        if location_coords:
-            try:
-                lat, lng = map(float, location_coords.split(',')[:2])
-                data['location_coords'] = Point(lng, lat)
-            except (ValueError, TypeError):
-                raise serializers.ValidationError({
-                    'location_coords': 'Invalid format for location_coords. It should be "lat,lng".'
-                })
-        return super().to_internal_value(data)
+    def create(self, validated_data):
+        vendors_data = validated_data.pop('vendors')
+        service = Service.objects.create(**validated_data)
+        for vendor in vendors_data:
+            ServiceVendor.objects.create(service=service, vendor=vendor)
+        return service
+
+    def update(self, instance, validated_data):
+        vendors_data = validated_data.pop('vendors', None)
+        if vendors_data is not None:
+            instance.servicevendor_set.all().delete()
+            for vendor in vendors_data:
+                ServiceVendor.objects.create(service=instance, vendor=vendor)
+        
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
 
 
 class LogSerializer(serializers.ModelSerializer):
     class Meta:
         model = Log
-        fields = ['business','operation','entity','entity_id','description','timestamp']
-
-
-class ServiceVendorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ServiceVendor
-        fields = ['service','vendor','assigned_at']
+        fields = ['business','operation','entity','entity_id','description']
+        read_only_fields = ['business']
 
 
 class RestrictionSerializer(serializers.ModelSerializer):
