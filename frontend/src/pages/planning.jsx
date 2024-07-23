@@ -6,6 +6,13 @@ import {
   TextField,
   InputAdornment,
   Button,
+  Autocomplete,
+  Chip,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  OutlinedInput,
 } from "@mui/material";
 import { Business, People, Place } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
@@ -15,28 +22,29 @@ import MapBox from "../components/MapBox";
 import Calendar from "../components/Calendar";
 import TimePicker from "../components/Time";
 import postService from "../services/postService";
+import getTaxiZones from "../services/getTaxiZones";
+import getBusinessUnits from "../services/getBusinessUnits";
+import getVendors from "../services/getVendorDetails";
 
 const Planning = () => {
   const [coordinates, setCoordinates] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedStartTime, setSelectedStartTime] = useState("");
   const [selectedEndTime, setSelectedEndTime] = useState("");
   const [businessUnit, setBusinessUnit] = useState("");
-  const [authorisedVendors, setAuthorisedVendors] = useState("");
+  const [authorisedVendors, setAuthorisedVendors] = useState([]);
   const [areas, setAreas] = useState("");
   const [LocationCords, setLocationCords] = useState(null);
+  const [taxiZones, setTaxiZones] = useState(null);
+  const [businessUnits, setBusinessUnits] = useState([]);
+  const [vendors, setVendors] = useState([]);
+  const [selectedZone, setSelectedZone] = useState(null);
   const navigate = useNavigate();
-
-  const addLocationCords = (coords) => {
-    setLocationCords(coords);
-  };
 
   const handleClick = async () => {
     const formData = {
       business: parseInt(businessUnit, 10),
-      unit: parseInt(authorisedVendors, 10),
+      unit: authorisedVendors.map(vendor => parseInt(vendor, 10)),
       service_date: selectedDate.format("YYYY-MM-DD"),
       service_start_time: selectedStartTime.format("HH:mm:ss"),
       service_end_time: selectedEndTime.format("HH:mm:ss"),
@@ -66,37 +74,50 @@ const Planning = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      const taxiZones = await getTaxiZones();
+      setTaxiZones(taxiZones);
+
+      const businessUnits = await getBusinessUnits();
+      setBusinessUnits(businessUnits);
+
+      const vendors = await getVendors();
+      setVendors(vendors);
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!selectedDate || !selectedStartTime || !selectedEndTime) {
+        return;
+      }
+
       try {
-        const host = import.meta.env.VITE_API_URL;
-        if (selectedDate && selectedStartTime && selectedEndTime) {
-          const response = await api.get(`/api/busyness_score/?datetime=${selectedDate.format("YYYY-MM-DD")}%20${selectedStartTime.format("HH:mm:ss")}`);
-          if (!response.ok) {
-            throw new Error("Network response was not ok " + response.statusText);
-          }
-          const textData = await response.text();
-          let data;
+        const formattedDate = selectedDate.format("YYYY-MM-DD");
+        const formattedStartTime = selectedStartTime.format("HH:mm:ss");
 
-          try {
-            data = JSON.parse(textData);
-          } catch (error) {
-            console.error("Error parsing JSON:", error);
-            return;
-          }
+        const response = await api.get(
+          `/get_busyness_scores/?datetime=${formattedDate}%20${formattedStartTime}`
+        );
+        console.log(response);
 
-          if (typeof data === "string") {
-            data = JSON.parse(data);
-          }
-          const features = data.features;
-          const filteredData = features.map((item) => ({
-            geometry: item.geometry,
-            score: item.Score,
-          }));
-          setCoordinates(filteredData);
+        let data = response.data;
+        console.log("data", data);
+
+        if (typeof data === "string") {
+          data = JSON.parse(data);
         }
+
+        const features = data.features;
+        console.log(features);
+        const filteredData = features.map((item) => ({
+          geometry: item.geometry,
+          score: item.Score,
+        }));
+        console.log("filteredData", filteredData);
+        setCoordinates(filteredData);
       } catch (error) {
-        setError(error);
-      } finally {
-        setLoading(false);
+        console.error("Error fetching or parsing data:", error);
       }
     };
 
@@ -142,7 +163,11 @@ const Planning = () => {
           zIndex: "0",
         }}
       >
-        <MapBox initialHeatMapCor={coordinates} addZoomLocations={addLocationCords} />
+        <MapBox
+          initialHeatMapCor={coordinates}
+          taxiZoneData={taxiZones}
+          selectedZone={selectedZone}
+        />
       </Grid>
 
       <Box sx={formContainerStyle}>
@@ -156,50 +181,91 @@ const Planning = () => {
 
         <TimePicker name="End Time" onTimeChange={handleEndTimeChange} />
 
-        <TextField
+        <Autocomplete
           fullWidth
-          label="Areas"
+          options={taxiZones ? taxiZones.features.map((zone) => zone.geometry.zone) : []}
           value={areas}
-          onChange={(e) => setAreas(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Place />
-              </InputAdornment>
-            ),
+          onChange={(event, newValue) => {
+            setAreas(newValue);
+            const zoneDetails = taxiZones.features.find(zone => zone.geometry.zone === newValue);
+            setSelectedZone(zoneDetails);
           }}
-          sx={inputFieldStyle}
+          renderOption={(props, option) => (
+            <li key={option} {...props}>
+              {option}
+            </li>
+          )}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Areas"
+              InputProps={{
+                ...params.InputProps,
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Place />
+                  </InputAdornment>
+                ),
+              }}
+              sx={inputFieldStyle}
+            />
+          )}
         />
 
-        <TextField
+        <Autocomplete
           fullWidth
-          label="Business Unit"
+          options={businessUnits ? businessUnits.map((unit) => unit.permit_id) : []}
           value={businessUnit}
-          onChange={(e) => setBusinessUnit(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Business />
-              </InputAdornment>
-            ),
+          onChange={(event, newValue) => {
+            setBusinessUnit(newValue);
           }}
-          sx={inputFieldStyle}
+          renderOption={(props, option) => (
+            <li key={option} {...props}>
+              {option}
+            </li>
+          )}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Business Unit"
+              InputProps={{
+                ...params.InputProps,
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Business />
+                  </InputAdornment>
+                ),
+              }}
+              sx={inputFieldStyle}
+            />
+          )}
         />
 
-        <TextField
-          fullWidth
-          label="Authorised Vendors"
-          value={authorisedVendors}
-          onChange={(e) => setAuthorisedVendors(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <People />
-              </InputAdornment>
-            ),
-          }}
-          sx={inputFieldStyle}
-        />
+        <FormControl fullWidth sx={inputFieldStyle}>
+          <InputLabel id="vendors-label">Authorised Vendors</InputLabel>
+          <Select
+            labelId="vendors-label"
+            multiple
+            value={authorisedVendors}
+            onChange={(event) => {
+              setAuthorisedVendors(event.target.value);
+            }}
+            input={<OutlinedInput label="Authorised Vendors" />}
+            renderValue={(selected) => (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                {selected.map((value) => (
+                  <Chip key={value} label={value} />
+                ))}
+              </Box>
+            )}
+          >
+            {vendors.map((vendor) => (
+              <MenuItem key={vendor.licence_id} value={vendor.licence_id}>
+                {vendor.licence_id}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
         <Button
           sx={submitButtonStyle}
