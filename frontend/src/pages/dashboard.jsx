@@ -22,10 +22,15 @@ const tableData = [
   { date: '27/06/2024', time: '15:30 - 21:00', unit: 'AA09473', vendor: 'C4078', address: 'Riverview St. Levittown, NY 11756', eft: 5297 }
 ];
 
+function logout() {
+  localStorage.clear();
+  navigate('/login');
+}
+
 const Dashboard = () => {
   return (
     <Box sx={{ flexGrow: 1, padding: 3, }}>
-      <AppBar />
+      <AppBar logout={logout}/>
       <Grid sx={{mt: "30px"}} container spacing={2}>
         <Grid item xs={12} md={4}>
           <Box sx={{ backgroundColor: 'lightgrey', padding: 2, borderRadius: 1, mb: 2 }}>

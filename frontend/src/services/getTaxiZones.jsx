@@ -55,7 +55,6 @@ const parseMultipolygon = (data) => {
   };
 };
 
-// Improved centroid calculation for multipolygons
 const calculateCentroid = (coordinates) => {
   let totalArea = 0;
   let centroidX = 0;

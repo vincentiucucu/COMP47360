@@ -71,10 +71,26 @@ const ZoneClickHandler = ({ selectedZone }) => {
   return null;
 };
 
-const MapBox = ({ initialHeatMapCor, taxiZoneData, selectedZone }) => {
+const MarkerClickHandler = ({ setSelectedCord, setAddress }) => {
+  const map = useMapEvents({
+    click: (e) => {
+      const { lat, lng } = e.latlng;
+
+      if (map.getZoom() > 15) {
+        setSelectedCord({ lat, lng });
+        setAddress(`Latitude: ${lat.toFixed(5)}, Longitude: ${lng.toFixed(5)}`);
+      }
+    },
+  });
+  return null;
+};
+
+const PlanningMap = ({ initialHeatMapCor, taxiZoneData, selectedZone, setSelectedCord, initialSelectedCord }) => {
   const [heatmapData, setHeatmapData] = useState([]);
   const [layersCleared, setLayersCleared] = useState(false);
   const [hoverEnabled, setHoverEnabled] = useState(true);
+  const [selectedCord, setSelectedCordState] = useState(initialSelectedCord || null);
+  const [address, setAddress] = useState('');
   const mapRef = useRef(null);
 
   useEffect(() => {
@@ -94,6 +110,13 @@ const MapBox = ({ initialHeatMapCor, taxiZoneData, selectedZone }) => {
       mapRef.current.setView([centerLat, centerLng], 18);
     }
   }, [selectedZone]);
+
+  useEffect(() => {
+    if (initialSelectedCord) {
+      setSelectedCordState(initialSelectedCord);
+      setAddress(`Latitude: ${initialSelectedCord.lat.toFixed(5)}, Longitude: ${initialSelectedCord.lng.toFixed(5)}`);
+    }
+  }, [initialSelectedCord]);
 
   const onEachFeature = (feature, layer) => {
     if (hoverEnabled) {
@@ -131,7 +154,7 @@ const MapBox = ({ initialHeatMapCor, taxiZoneData, selectedZone }) => {
     <MapContainer
       center={center}
       zoom={zoom}
-      style={{ height: "100%", width: "100%" }}
+      style={{ height: "100%", width: "100%", position:'absolute', zIndex:'-100'}}
       whenCreated={handleMapLoad}
     >
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
@@ -145,8 +168,18 @@ const MapBox = ({ initialHeatMapCor, taxiZoneData, selectedZone }) => {
         />
       )}
       {selectedZone && <ZoneClickHandler selectedZone={selectedZone} />}
+      <MarkerClickHandler setSelectedCord={(coords) => {
+          setSelectedCordState(coords);
+          setSelectedCord(coords); 
+        }} 
+        setAddress={setAddress} />
+      {selectedCord && (
+        <Marker position={[selectedCord.lat, selectedCord.lng]}>
+          <Popup>{address}</Popup>
+        </Marker>
+      )}
     </MapContainer>
   );
 };
 
-export default MapBox;
+export default PlanningMap;

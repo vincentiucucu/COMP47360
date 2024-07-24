@@ -7,7 +7,7 @@ function createData(id, date, time, unit, business, address) {
 const fetchBusinessUnits = async (setPastRows, setPresentRows, setLoading, setError) => {
   setLoading(true);
   try {
-    const response = await api.get('api/service/');
+    const response = await api.get('/api/service/');
     const data = response.data.results;
     const today = new Date();
     

@@ -3,21 +3,35 @@ import { Box, Button, Typography, Grid } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
 import AppBar from "../components/HamburgerBox";
-import Map from "../components/MapBox";
+import ServicesMap from "../components/ServicesMap";
 import DataGrid from "../components/DataGrid";
+import CustomToast from "../components/CustomToast"; 
+import getServicesLocations from '../services/getServicesLocations';
 import getServices from '../services/getServices';
 
 function Services() {
   const [pastRows, setPastRows] = useState([]);
   const [presentRows, setPresentRows] = useState([]);
+  const [coordinates, setCoordinates] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
 
   const location = useLocation();
   const formData = location.state?.formData;
 
   useEffect(() => {
-    getServices(setPastRows, setPresentRows, setLoading, setError);
+    const fetchServices = async () => {
+      try {
+        await getServices(setPastRows, setPresentRows, setLoading, setError);
+        await getServicesLocations(setCoordinates, setLoading, setError);
+      } catch (error) {
+        setToastMessage("Failed to fetch services data. Please try again.");
+        setShowToast(true);
+      }
+    };
+    fetchServices();
   }, []);
 
   const buttonStyles = {
@@ -50,6 +64,11 @@ function Services() {
     navigate("/planning");
   };
 
+  function logout() {
+    localStorage.clear();
+    navigate('/login');
+  }
+
   const headerTypographyStyle = {
     color: "black",
     fontSize: "25px",
@@ -73,7 +92,7 @@ function Services() {
 
   return (
     <Box sx={{ display: "grid", gridTemplateRows: "auto 1fr" }}>
-      <AppBar />
+      <AppBar logout={logout}/>
 
       <Box sx={{ flexGrow: 1, paddingLeft: "20px", mt: "64px", height: "80vh" }}>
         <Box className="headertitle">
@@ -100,7 +119,7 @@ function Services() {
           </Grid>
 
           <Grid item xs={12} lg={4} sx={{ mb: '-150px', maxHeight: '1000px', width: '100%' }}>
-            <Map />
+            <ServicesMap coordinates={coordinates} />
           </Grid>
 
           <Grid item xs={12} lg={8} sx={{ marginTop: { xs: "100px", lg: "0px" } }}>
@@ -117,6 +136,13 @@ function Services() {
           </Grid>
         </Grid>
       </Box>
+
+      {showToast && (
+        <CustomToast
+          closeToast={() => setShowToast(false)}
+          message={toastMessage}
+        />
+      )}
     </Box>
   );
 }
