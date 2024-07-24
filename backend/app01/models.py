@@ -157,10 +157,10 @@ class ZoneBusynessScore(models.Model):
         db_table = 'zones_busyness_score'
 
 class StreetBusynessScore(models.Model):
-    zoned_street_centroid = models.PointField()
+    centroid = models.PointField()
     hour = models.DateTimeField()
     score = models.FloatField()
-    zone_id = models.IntegerField()
+    zone = models.IntegerField()
     id = models.AutoField(primary_key=True)
 
     class Meta:
