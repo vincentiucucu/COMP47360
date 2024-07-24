@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  Grid,
   Box,
   Typography,
   TextField,
@@ -13,17 +12,21 @@ import {
   InputLabel,
   FormControl,
   OutlinedInput,
+  IconButton,
+  CircularProgress,
 } from "@mui/material";
-import { Business, Place } from "@mui/icons-material";
+import { Business, Place, Close, ArrowForward } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import api from "../api";
 import AppBar from "../components/HamburgerBox";
 import PlanningMap from "../components/PlanningMap";
 import Calendar from "../components/Calendar";
 import TimePicker from "../components/Time";
-import CustomToast from "../components/CustomToast"; 
+import CustomToast from "../components/CustomToast";
+import { toast } from 'react-toastify';
 import postService from "../services/postService";
-import getTaxiZones from "../services/getTaxiZones";
+import getTaxiZones from "../services/getTaxiZones"
+import getBusynessScores from "../services/getBusynessScores";
 import getBusinessUnits from "../services/getBusinessUnits";
 import getVendors from "../services/getVendorDetails";
 
@@ -40,13 +43,28 @@ const Planning = () => {
   const [businessUnits, setBusinessUnits] = useState([]);
   const [vendors, setVendors] = useState([]);
   const [selectedZone, setSelectedZone] = useState(null);
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
+  const [address, setAddress] = useState("");
+  const [showPlanningBox, setShowPlanningBox] = useState(true);
+  const [loading, setLoading] = useState(false); // Loading state
   const navigate = useNavigate();
 
   const handleClick = async () => {
+    if (!selectedDate || !selectedStartTime || !selectedEndTime || !businessUnit || !authorisedVendors.length || !areas || !address) {
+      let missingField = '';
+      if (!selectedDate) missingField = 'Date';
+      else if (!selectedStartTime) missingField = 'Start Time';
+      else if (!selectedEndTime) missingField = 'End Time';
+      else if (!businessUnit) missingField = 'Business Unit';
+      else if (!authorisedVendors.length) missingField = 'Authorised Vendors';
+      else if (!areas) missingField = 'Area';
+      else if (!address) missingField = 'Address';
+
+      toast(<CustomToast header="WARNING" text={`Please enter ${missingField}`}/>);
+      return;
+    }
+
     if (!LocationCords) {
-      console.error("LocationCords is null");
+      toast(<CustomToast header="WARNING" text="Please select location on the map"/>);
       return;
     }
 
@@ -58,7 +76,7 @@ const Planning = () => {
       service_end_time: selectedEndTime.format("HH:mm:ss"),
       location_coords: `SRID=4326;POINT(${LocationCords.lng} ${LocationCords.lat})`,
       location_address: areas,
-      revenue:'-25',
+      revenue: '-25',
     };
 
     try {
@@ -66,12 +84,11 @@ const Planning = () => {
       if (result) {
         navigate("/services", { state: { formData } });
       } else {
-        setToastMessage("Failed to create service. Please try again.");
-        setShowToast(true);
+        toast(<CustomToast header="ERROR" text="Failed to create service. Please try again."/>);
       }
     } catch (error) {
-      setToastMessage("Failed to create service. Please try again.");
-      setShowToast(true);
+      console.log("ERROR")
+      toast(<CustomToast header="ERROR" text="An error occurred while creating the service. Please try again"/>);
     }
   };
 
@@ -94,6 +111,7 @@ const Planning = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const taxiZones = await getTaxiZones();
         setTaxiZones(taxiZones);
@@ -104,8 +122,9 @@ const Planning = () => {
         const vendors = await getVendors();
         setVendors(vendors);
       } catch (error) {
-        setToastMessage("Failed to fetch data. Please try again.");
-        setShowToast(true);
+        toast(<CustomToast header="WARNING" text="Failed to fetch vendors and business data. Please try again."/>);
+      } finally {
+        setLoading(false);
       }
     };
     fetchData();
@@ -117,14 +136,12 @@ const Planning = () => {
         return;
       }
 
+      setLoading(true);
       try {
         const formattedDate = selectedDate.format("YYYY-MM-DD");
         const formattedStartTime = selectedStartTime.format("HH:mm:ss");
-
-        const response = await api.get(
-          `/get_busyness_scores/?datetime=${formattedDate}%20${formattedStartTime}`
-        );
-
+        
+        const response = await getBusynessScores(formattedDate,formattedStartTime)
         let data = response.data;
         if (typeof data === "string") {
           data = JSON.parse(data);
@@ -137,8 +154,9 @@ const Planning = () => {
         }));
         setCoordinates(filteredData);
       } catch (error) {
-        setToastMessage("Failed to fetch busyness scores. Please try again.");
-        setShowToast(true);
+        toast(<CustomToast header="WARNING" text="Failed to fetch busyness scores. Please try again."/>);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -147,15 +165,17 @@ const Planning = () => {
 
   const formContainerStyle = {
     top: "75px",
-    left: "20px",
+    left: showPlanningBox ? "20px" : "-100vw",
+    opacity: showPlanningBox ? 1 : 0,
     height: "auto",
     width: "20vw",
     minWidth: "250px",
     borderRadius: "20px",
-    p: 3,
+    p: 1.5,
     position: "absolute",
-    zIndex: 10, // Ensure this is higher than the map
+    zIndex: 10,
     backdropFilter: "blur(30px)",
+    transition: "left 0.3s ease-in-out, opacity 0.3s ease-in-out",
   };
 
   const inputFieldStyle = {
@@ -172,29 +192,60 @@ const Planning = () => {
     width: "100%",
   };
 
+  const toggleButtonStyle = {
+    position: "absolute",
+    top: "75px",
+    left: showPlanningBox ? "calc(20vw + 20px)" : "10px",
+    zIndex: 11,
+    transition: "left 0.3s ease-in-out",
+    backgroundColor: "orangered",
+    color: "white",
+    "&:hover": {
+      backgroundColor: "darkorange",
+    },
+  };
+
+  const mapContainerStyle = {
+    width: "100%",
+    height: "100%",
+    position: "absolute",
+    top: 0,
+    left: 0,
+    zIndex: -1, 
+  };
+
   return (
     <Box>
       <AppBar logout={logout} />
-      <Grid
-        sx={{
-          width: "100vw",
-          height: "100vh",
-          m: "-10px",
-          position: "absolute",
-          zIndex: "0", // Lower z-index for the map
-        }}
-      >
+      <Box sx={mapContainerStyle}>
         <PlanningMap
           initialHeatMapCor={coordinates}
           taxiZoneData={taxiZones}
           selectedZone={selectedZone}
           selectedCord={LocationCords}
-          setSelectedCord={setLocationCords} 
+          setSelectedCord={setLocationCords}
         />
-      </Grid>
+      </Box>
 
       <Box sx={formContainerStyle}>
-        <Typography variant="h5" sx={{ mb: 2, color: "orangered" }}>
+        {loading && (
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(255, 255, 255, 0.7)',
+            zIndex: 1000,
+            borderRadius: '20px'
+          }}>
+            <CircularProgress />
+          </Box>
+        )}
+        <Typography variant="h5" sx={{ color: "orangered" }}>
           Plan A Service
         </Typography>
 
@@ -240,7 +291,7 @@ const Planning = () => {
           options={businessUnits ? businessUnits.map((unit) => unit.permit_id) : []}
           value={businessUnit}
           onChange={(event, newValue) => {
-            const newBusinessUnit = newValue
+            const newBusinessUnit = newValue;
             setBusinessUnit(newBusinessUnit);
           }}
           renderOption={(props, option) => (
@@ -272,8 +323,7 @@ const Planning = () => {
             multiple
             value={authorisedVendors}
             onChange={(event) => {
-              const newVendor = event.target.value
-              console.log(newVendor)
+              const newVendor = event.target.value;
               setAuthorisedVendors(event.target.value);
             }}
             input={<OutlinedInput label="Authorised Vendors" />}
@@ -293,17 +343,33 @@ const Planning = () => {
           </Select>
         </FormControl>
 
+        <TextField
+          fullWidth
+          label="Address"
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          sx={inputFieldStyle}
+        />
+
         <Button sx={submitButtonStyle} variant="contained" onClick={handleClick}>
           Submit
         </Button>
+
+        <IconButton
+          sx={{ position: "absolute", top: "10px", right: "10px", color: "orangered" }}
+          onClick={() => setShowPlanningBox(false)}
+        >
+          <Close />
+        </IconButton>
       </Box>
 
-      {showToast && (
-        <CustomToast
-          closeToast={() => setShowToast(false)}
-          message={toastMessage}
-          sx={{ zIndex: 100 }} 
-        />
+      {!showPlanningBox && (
+        <IconButton
+          sx={toggleButtonStyle}
+          onClick={() => setShowPlanningBox(true)}
+        >
+          <ArrowForward />
+        </IconButton>
       )}
     </Box>
   );

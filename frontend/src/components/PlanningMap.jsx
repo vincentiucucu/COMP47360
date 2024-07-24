@@ -46,7 +46,7 @@ const MapClickHandler = ({ csvGeoJsonData, setLayersCleared, setHoverEnabled }) 
     zoomend: () => {
       const currentZoom = map.getZoom();
       console.log("Current Zoom Level:", currentZoom);
-      if (currentZoom >= 18) {
+      if (currentZoom >= 15) {
         setHoverEnabled(false);
         setLayersCleared(true);
       } else {
@@ -119,6 +119,13 @@ const PlanningMap = ({ initialHeatMapCor, taxiZoneData, selectedZone, setSelecte
   }, [initialSelectedCord]);
 
   const onEachFeature = (feature, layer) => {
+    layer.setStyle({
+      color: "#808080", 
+      dashArray: "",
+      fillOpacity: 0.2,
+      fillColor: "#808080", 
+    });
+    
     if (hoverEnabled) {
       layer.on({
         mouseover: (e) => {
@@ -133,10 +140,10 @@ const PlanningMap = ({ initialHeatMapCor, taxiZoneData, selectedZone, setSelecte
         mouseout: (e) => {
           const layer = e.target;
           layer.setStyle({
-            color: "#3388ff",
+            color: "#808080", 
             dashArray: "",
             fillOpacity: 0.2,
-            fillColor: "#3388ff",
+            fillColor: "#808080", 
           });
         },
       });
@@ -154,7 +161,7 @@ const PlanningMap = ({ initialHeatMapCor, taxiZoneData, selectedZone, setSelecte
     <MapContainer
       center={center}
       zoom={zoom}
-      style={{ height: "100%", width: "100%", position:'absolute', zIndex:'-100'}}
+      style={{ height: "100%", width: "100%", position: 'absolute', zIndex: -1 }} 
       whenCreated={handleMapLoad}
     >
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />

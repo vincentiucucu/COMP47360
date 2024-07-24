@@ -1,10 +1,10 @@
-// Business.jsx
 import React, { useState, useEffect } from "react";
-import { Button, Box, Typography, Grid, CircularProgress } from "@mui/material";
+import { Button, Box, Typography, Grid, IconButton, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
 import AppBar from "../components/HamburgerBox";
 import DataGrid from "../components/DataGrid";
-import { useNavigate, Navigate } from "react-router-dom";
-import AddIcon from "@mui/icons-material/Add";
+import { useNavigate } from "react-router-dom";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import GroupIcon from "@mui/icons-material/Group";
 import ImageCardBox from "../components/ImageCardBox";
@@ -12,6 +12,8 @@ import getBusinessUnits from "../services/getBusinessUnits";
 import getVendors from "../services/getVendorDetails";
 import postBusinessUnit from "../services/postBusinessUnit";
 import postVendor from "../services/postVendor";
+import deleteBusinessUnit from "../services/deleteBusinessUnit";
+import deleteVendor from "../services/deleteVendor";
 import AddDialog from "../components/AddDialog";
 import CustomToast from "../components/CustomToast";
 import { toast } from 'react-toastify';
@@ -21,10 +23,27 @@ const buttonStyles = {
   textTransform: "none",
   backgroundColor: "#F6F6F6",
   borderRadius: "10px",
-  padding: "1px 5px",
+  padding: "8px 16px",
   marginRight: "8px",
   color: "black",
   borderColor: "transparent",
+  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+  transition: "all 0.3s ease-in-out",
+  "&:hover": {
+    backgroundColor: "#E0E0E0",
+    borderColor: "black",
+    borderStyle: "solid",
+    transform: "scale(1.05)",
+    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+  },
+  "&:active": {
+    transform: "scale(1.02)",
+    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+  },
+  "&:focus": {
+    outline: "none",
+    boxShadow: "0 0 0 3px rgba(255, 105, 135, 0.5)",
+  },
 };
 
 const boxStyles = {
@@ -58,6 +77,9 @@ export default function Business() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState("");
   const [loading, setLoading] = useState(false);
+  const [deleteId, setDeleteId] = useState(null); 
+  const [deleteType, setDeleteType] = useState(""); 
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false); 
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -92,6 +114,19 @@ export default function Business() {
       editable: true,
     },
     { field: "unit_type", headerName: "Unit Type", width: 100, editable: true },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 60,
+      renderCell: (params) => (
+        <IconButton
+          color="error"
+          onClick={() => handleDeleteClick(params.row.permit_id, "business")}
+        >
+          <DeleteIcon />
+        </IconButton>
+      ),
+    },
   ];
 
   const vendorColumns = [
@@ -111,8 +146,8 @@ export default function Business() {
     },
     {
       field: "licence_expiry_date",
-      headerName: "Licence Expiry Date",
-      width: 150,
+      headerName: "Expiry Date",
+      width: 130,
       editable: true,
     },
     {
@@ -123,9 +158,22 @@ export default function Business() {
     },
     {
       field: "vendor_phone_number",
-      headerName: "Vendor Phone Number",
+      headerName: "Phone Number",
       width: 150,
       editable: true,
+    },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 60,
+      renderCell: (params) => (
+        <IconButton
+          color="error"
+          onClick={() => handleDeleteClick(params.row.licence_id, "vendor")}
+        >
+          <DeleteIcon />
+        </IconButton>
+      ),
     },
   ];
 
@@ -173,6 +221,31 @@ export default function Business() {
     setDialogOpen(false);
   };
 
+  const handleDeleteClick = (id, type) => {
+    setDeleteId(id);
+    setDeleteType(type);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    setLoading(true);
+    try {
+      if (deleteType === "business") {
+        await deleteBusinessUnit(deleteId);
+        setBusinessRows((prevRows) => prevRows.filter((row) => row.permit_id !== deleteId));
+      } else if (deleteType === "vendor") {
+        await deleteVendor(deleteId);
+        setVendorRows((prevRows) => prevRows.filter((row) => row.licence_id !== deleteId));
+      }
+      toast(<CustomToast header="SUCCESS" text="Deleted successfully." />);
+    } catch (error) {
+      toast(<CustomToast header="ERROR" text="Failed to delete. Please try again." />);
+    } finally {
+      setLoading(false);
+      setOpenDeleteDialog(false);
+    }
+  };
+
   function logout() {
     localStorage.clear();
     navigate('/login');
@@ -180,18 +253,11 @@ export default function Business() {
 
   return (
     <Box sx={{ display: "grid", gridTemplateRows: "auto 1fr" }}>
-      {/* App Bar */}
-      <AppBar logout={logout}/>
+      <AppBar logout={logout} />
 
-      {/* Layout */}
-      <Box
-        sx={{ flexGrow: 1, paddingLeft: "20px", mt: "64px", height: "80vh" }}
-      >
-        {/* Header */}
+      <Box sx={{ flexGrow: 1, paddingLeft: "20px", mt: "64px", height: "80vh" }}>
         <Box className="headertitle">
-          <Typography
-            sx={{ color: "black", fontSize: "35px", fontWeight: "500" }}
-          >
+          <Typography sx={{ color: "black", fontSize: "35px", fontWeight: "500" }}>
             My Business
           </Typography>
         </Box>
@@ -230,33 +296,13 @@ export default function Business() {
             </Box>
 
             <Grid container spacing={2} sx={gridStyles.container}>
-              {/* Business Units */}
               <Grid item xs={12}>
                 <Box sx={boxStyles}>
-                  <Box
-                    sx={{
-                      p: "10px 0px",
-                      display: "grid",
-                      gridTemplateColumns: "auto 1fr",
-                      alignSelf: "start",
-                    }}
-                  >
-                    <Typography
-                      sx={{
-                        color: "black",
-                        pr: "10px",
-                        fontSize: "25px",
-                        alignContent: "center",
-                      }}
-                    >
+                  <Box sx={{ p: "10px 0px", display: "grid", gridTemplateColumns: "auto 1fr", alignSelf: "start" }}>
+                    <Typography sx={{ color: "black", pr: "10px", fontSize: "25px", alignContent: "center" }}>
                       Business Units
                     </Typography>
-                    <Button
-                      variant="outlined"
-                      startIcon={<AddIcon />}
-                      sx={buttonStyles}
-                      onClick={() => handleAddClick("business")}
-                    >
+                    <Button startIcon={<AddIcon />} sx={buttonStyles} onClick={() => handleAddClick("business")}>
                       Add
                     </Button>
                   </Box>
@@ -266,33 +312,13 @@ export default function Business() {
                 </Box>
               </Grid>
 
-              {/* Authorised Vendors */}
               <Grid sx={gridStyles.item} item xs={12}>
                 <Box sx={boxStyles}>
-                  <Box
-                    sx={{
-                      p: "10px 0px",
-                      display: "grid",
-                      gridTemplateColumns: "auto 1fr",
-                      alignSelf: "start",
-                    }}
-                  >
-                    <Typography
-                      sx={{
-                        color: "black",
-                        pr: "10px",
-                        fontSize: "25px",
-                        alignContent: "center",
-                      }}
-                    >
+                  <Box sx={{ p: "10px 0px", display: "grid", gridTemplateColumns: "auto 1fr", alignSelf: "start" }}>
+                    <Typography sx={{ color: "black", pr: "10px", fontSize: "25px", alignContent: "center" }}>
                       Authorised Vendors
                     </Typography>
-                    <Button
-                      variant="outlined"
-                      startIcon={<AddIcon />}
-                      sx={buttonStyles}
-                      onClick={() => handleAddClick("vendor")}
-                    >
+                    <Button startIcon={<AddIcon />} sx={buttonStyles} onClick={() => handleAddClick("vendor")}>
                       Add
                     </Button>
                   </Box>
@@ -306,12 +332,22 @@ export default function Business() {
         )}
       </Box>
 
-      <AddDialog
-        open={dialogOpen}
-        handleClose={handleDialogClose}
-        handleAdd={handleDialogAdd}
-        type={dialogType}
-      />
+      <AddDialog open={dialogOpen} handleClose={handleDialogClose} handleAdd={handleDialogAdd} type={dialogType} />
+
+      <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
+        <DialogTitle>Delete {deleteType === "business" ? "Business Unit" : "Vendor"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>Are you sure you want to delete this {deleteType === "business" ? "business unit" : "vendor"}?</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDeleteDialog(false)} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteConfirm} color="error">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

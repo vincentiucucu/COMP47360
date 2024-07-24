@@ -9,7 +9,36 @@ import logo from "../assets/Images/Logo/VendTune_Logo.png";
 import profile from "../assets/Images/Icons/profile.png";
 import SideDrawer from "./SideDrawer";
 import Button from "@mui/material/Button";
-import { useMediaQuery, useTheme } from "@mui/material";
+import { useMediaQuery, useTheme, styled, keyframes } from "@mui/material";
+
+const fadeInSlideDown = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
+const AnimatedBox = styled(Box)`
+  animation: ${fadeInSlideDown} 0.3s ease-out;
+`;
+
+const StyledButton = styled(Button)`
+  background-color: #f6f6f6;
+  color: black;
+  padding: 8px 16px;
+  border-radius: 4px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: #e0e0e0;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  }
+`;
 
 export default function AppBarGrid({ toggleDrawer, logout }) {
   const theme = useTheme();
@@ -54,7 +83,7 @@ export default function AppBarGrid({ toggleDrawer, logout }) {
           >
             {!isSmallScreen && (
               <Typography
-                sx={{ color: "#EE6C4D", alignSelf: "center", textAlign: "end" }}
+                sx={{ color: "#EE6C4D", alignSelf: "center", textAlign: "end", fontWeight:'bold' }}
               >
                 Profile
               </Typography>
@@ -66,18 +95,18 @@ export default function AppBarGrid({ toggleDrawer, logout }) {
         </Toolbar>
       </AppBar>
       {showSignOutButton && (
-        <Box
+        <AnimatedBox
           sx={{
             position: "absolute",
             top: 65,
             right: 16,
-            zIndex:'100'
+            zIndex: '150'
           }}
         >
-          <Button sx={{ bgcolor: "#f6f6f6", color: 'black'}} onClick={logout}>
+          <StyledButton onClick={logout}>
             Sign Out
-          </Button>
-        </Box>
+          </StyledButton>
+        </AnimatedBox>
       )}
       <SideDrawer />
     </Box>

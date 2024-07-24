@@ -9,12 +9,16 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import CircularProgress from '@mui/material/CircularProgress';
+import IconButton from '@mui/material/IconButton';
+import InputAdornment from '@mui/material/InputAdornment';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { useNavigate } from 'react-router-dom';
 import { register } from '../services/postRegister';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../styles/Register.scss';
-import CustomToast from '../components/CustomToast'
+import CustomToast from '../components/CustomToast';
 
 const containerStyle = {
   bgcolor: 'white',
@@ -108,7 +112,17 @@ function Copyright(props) {
 
 export default function Register() {
   const [loading, setLoading] = React.useState(false);
+  const [showPassword, setShowPassword] = React.useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
   const navigate = useNavigate();
+
+  const handleClickShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleClickShowConfirmPassword = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -188,10 +202,23 @@ export default function Register() {
                   fullWidth
                   name="new-password"
                   label="Password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   id="newPassword"
                   autoComplete="new-password"
                   sx={textFieldStyle}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={handleClickShowPassword}
+                          edge="end"
+                        >
+                          {showPassword ? <Visibility /> : <VisibilityOff />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -200,10 +227,23 @@ export default function Register() {
                   fullWidth
                   name="confirm-password"
                   label="Confirm Password"
-                  type="password"
+                  type={showConfirmPassword ? "text" : "password"}
                   id="confirmPassword"
                   autoComplete="new-password"
                   sx={textFieldStyle}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle confirm password visibility"
+                          onClick={handleClickShowConfirmPassword}
+                          edge="end"
+                        >
+                          {showConfirmPassword ?  <Visibility /> : <VisibilityOff />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
                 />
               </Grid>
             </Grid>

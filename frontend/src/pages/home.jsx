@@ -1,9 +1,15 @@
 import React, { useState } from "react";
 import { Box, Button, Grid, Typography, Link } from "@mui/material";
+import { styled, keyframes } from "@mui/system";
 import logo from "../assets/Images/Logo/VendTune_Logo.png";
 import dashboard from "../assets/Images/StockImages/DashboardImg.png";
 import business from "../assets/Images/StockImages/BusinessImg.png";
 import services from "../assets/Images/StockImages/ServicesImg.png";
+
+const buttonHoverEffect = keyframes`
+  0% { box-shadow: 0 0 0px #ff4500; }
+  100% { box-shadow: 0 0 20px #ff4500; }
+`;
 
 const buttonStyle = {
   textAlign: "center",
@@ -18,6 +24,35 @@ const buttonStyle = {
     },
   },
 };
+
+const SignInLink = styled(Link)`
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-right: 20px;
+  position: relative;
+  transition: color 0.3s, transform 0.3s;
+
+  &:hover {
+    color: orangered;
+    transform: translateX(5px);
+    &::after {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  &::after {
+    content: "→";
+    position: absolute;
+    right: -15px;
+    top: 0;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: opacity 0.3s, transform 0.3s;
+  }
+`;
 
 const Main = () => {
   const [image, setImage] = useState(dashboard);
@@ -39,7 +74,7 @@ const Main = () => {
         position: "absolute",
         top: "0px",
         left: "0px",
-        p:'20px'
+        p: "20px",
       }}
     >
       <Box
@@ -48,6 +83,7 @@ const Main = () => {
           color: "white",
           height: "100%",
           width: "100%",
+          mb: "4px",
         }}
       >
         <Grid container spacing={2} sx={{}}>
@@ -57,13 +93,7 @@ const Main = () => {
             </Box>
           </Grid>
           <Grid item xs={6} sx={{ textAlign: "end" }}>
-            <Link
-              href="/login"
-              color="inherit"
-              sx={{ textDecoration: "none", marginRight: "20px" }}
-            >
-              Sign in →
-            </Link>
+            <SignInLink href="/login">Sign in</SignInLink>
           </Grid>
           <Grid item xs={12} sx={{ textAlign: "center" }}>
             <Typography

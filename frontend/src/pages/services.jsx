@@ -1,13 +1,27 @@
 import React, { useState, useEffect } from "react";
-import { Box, Button, Typography, Grid } from "@mui/material";
+import {
+  Box,
+  Button,
+  Typography,
+  Grid,
+  IconButton,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle
+} from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
 import AppBar from "../components/HamburgerBox";
 import ServicesMap from "../components/ServicesMap";
 import DataGrid from "../components/DataGrid";
-import CustomToast from "../components/CustomToast"; 
+import CustomToast from "../components/CustomToast";
+import { toast } from 'react-toastify';
 import getServicesLocations from '../services/getServicesLocations';
 import getServices from '../services/getServices';
+import deleteService from '../services/deleteService';
 
 function Services() {
   const [pastRows, setPastRows] = useState([]);
@@ -15,53 +29,96 @@ function Services() {
   const [coordinates, setCoordinates] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [showToast, setShowToast] = useState(false);
-  const [toastMessage, setToastMessage] = useState("");
+  const [deleteId, setDeleteId] = useState(null);
+  const [openDialog, setOpenDialog] = useState(false);
+  const navigate = useNavigate();
 
   const location = useLocation();
   const formData = location.state?.formData;
 
+  const fetchServices = async () => {
+    try {
+      await getServices(setPastRows, setPresentRows, setLoading, setError);
+      await getServicesLocations(setCoordinates, setLoading, setError);
+    } catch (error) {
+      toast(<CustomToast header="ERROR" text="Failed to fetch services data. Please try again." />);
+    }
+  };
+
   useEffect(() => {
-    const fetchServices = async () => {
-      try {
-        await getServices(setPastRows, setPresentRows, setLoading, setError);
-        await getServicesLocations(setCoordinates, setLoading, setError);
-      } catch (error) {
-        setToastMessage("Failed to fetch services data. Please try again.");
-        setShowToast(true);
-      }
-    };
     fetchServices();
   }, []);
+
+  const handleAddClick = () => {
+    navigate("/planning");
+  };
+
+  const handleDeleteClick = (id) => {
+    setDeleteId(id);
+    setOpenDialog(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      console.log(deleteId)
+      await deleteService(deleteId);
+      await fetchServices();
+      toast(<CustomToast header="SUCCESS" text="Service deleted successfully." />);
+    } catch (error) {
+      toast(<CustomToast header="ERROR" text="Failed to delete service. Please try again." />);
+    } finally {
+      setOpenDialog(false);
+    }
+  };
+
+  const columns = [
+    { field: "id", headerName: "ID", width: 10 },
+    { field: "business", headerName: "Business", width: 90, editable: true },
+    { field: "date", headerName: "Date", width: 130, editable: true },
+    { field: "time", headerName: "Time", width: 150, editable: true },
+    { field: "unit", headerName: "Unit", width: 100, editable: true },
+    { field: "vendors", headerName: "Vendors", width: 180, editable: true },
+    { field: "address", headerName: "Address", width: 170, editable: true },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 60,
+      renderCell: (params) => (
+        <IconButton
+          color="error"
+          onClick={() => handleDeleteClick(params.row.service_id)}
+        >
+          <DeleteIcon />
+        </IconButton>
+      ),
+    },
+  ];
 
   const buttonStyles = {
     textTransform: "none",
     backgroundColor: "#F6F6F6",
     borderRadius: "10px",
-    padding: "1px 5px",
+    padding: "8px 16px",
     marginRight: "8px",
     color: "black",
     borderColor: "transparent",
+    boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+    transition: "all 0.3s ease-in-out",
     "&:hover": {
+      backgroundColor: "#E0E0E0",
       borderColor: "black",
-      borderWidth: "2px",
       borderStyle: "solid",
+      transform: "scale(1.05)",
+      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
     },
-  };
-
-  const columns = [
-    { field: "id", headerName: "ID", width: 90 },
-    { field: "business", headerName: "Business", width: 90, editable: true },
-    { field: "date", headerName: "Date", width: 150, editable: true },
-    { field: "time", headerName: "Time", width: 180, editable: true },
-    { field: "unit", headerName: "Unit", width: 100, editable: true },
-    { field: "address", headerName: "Address", width: 280, editable: true },
-  ];
-
-  const navigate = useNavigate();
-
-  const handleAddClick = () => {
-    navigate("/planning");
+    "&:active": {
+      transform: "scale(1.02)",
+      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+    },
+    "&:focus": {
+      outline: "none",
+      boxShadow: "0 0 0 3px rgba(255, 105, 135, 0.5)",
+    },
   };
 
   function logout() {
@@ -92,7 +149,7 @@ function Services() {
 
   return (
     <Box sx={{ display: "grid", gridTemplateRows: "auto 1fr" }}>
-      <AppBar logout={logout}/>
+      <AppBar logout={logout} />
 
       <Box sx={{ flexGrow: 1, paddingLeft: "20px", mt: "64px", height: "80vh" }}>
         <Box className="headertitle">
@@ -137,12 +194,20 @@ function Services() {
         </Grid>
       </Box>
 
-      {showToast && (
-        <CustomToast
-          closeToast={() => setShowToast(false)}
-          message={toastMessage}
-        />
-      )}
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>Delete Service</DialogTitle>
+        <DialogContent>
+          <DialogContentText>Are you sure you want to delete this service?</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleDeleteConfirm} color="error">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
