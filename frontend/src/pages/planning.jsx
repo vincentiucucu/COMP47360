@@ -17,7 +17,6 @@ import {
 } from "@mui/material";
 import { Business, Place, Close, ArrowForward } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import api from "../api";
 import AppBar from "../components/HamburgerBox";
 import PlanningMap from "../components/PlanningMap";
 import Calendar from "../components/Calendar";
@@ -35,9 +34,9 @@ const Planning = () => {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedStartTime, setSelectedStartTime] = useState("");
   const [selectedEndTime, setSelectedEndTime] = useState("");
-  const [businessUnit, setBusinessUnit] = useState("");
+  const [businessUnit, setBusinessUnit] = useState(null);
   const [authorisedVendors, setAuthorisedVendors] = useState([]);
-  const [areas, setAreas] = useState("");
+  const [areas, setAreas] = useState(null);
   const [LocationCords, setLocationCords] = useState(null);
   const [taxiZones, setTaxiZones] = useState(null);
   const [businessUnits, setBusinessUnits] = useState([]);
@@ -45,7 +44,7 @@ const Planning = () => {
   const [selectedZone, setSelectedZone] = useState(null);
   const [address, setAddress] = useState("");
   const [showPlanningBox, setShowPlanningBox] = useState(true);
-  const [loading, setLoading] = useState(false); // Loading state
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleClick = async () => {
@@ -87,7 +86,6 @@ const Planning = () => {
         toast(<CustomToast header="ERROR" text="Failed to create service. Please try again."/>);
       }
     } catch (error) {
-      console.log("ERROR")
       toast(<CustomToast header="ERROR" text="An error occurred while creating the service. Please try again"/>);
     }
   };
@@ -141,7 +139,7 @@ const Planning = () => {
         const formattedDate = selectedDate.format("YYYY-MM-DD");
         const formattedStartTime = selectedStartTime.format("HH:mm:ss");
         
-        const response = await getBusynessScores(formattedDate,formattedStartTime)
+        const response = await getBusynessScores(formattedDate, formattedStartTime);
         let data = response.data;
         if (typeof data === "string") {
           data = JSON.parse(data);
@@ -264,8 +262,9 @@ const Planning = () => {
             const zoneDetails = taxiZones.features.find((zone) => zone.geometry.zone === newValue);
             setSelectedZone(zoneDetails);
           }}
+          isOptionEqualToValue={(option, value) => option === value}
           renderOption={(props, option) => (
-            <li key={option} {...props}>
+            <li {...props} key={option}>
               {option}
             </li>
           )}
@@ -294,8 +293,9 @@ const Planning = () => {
             const newBusinessUnit = newValue;
             setBusinessUnit(newBusinessUnit);
           }}
+          isOptionEqualToValue={(option, value) => option === value}
           renderOption={(props, option) => (
-            <li key={option} {...props}>
+            <li {...props} key={option}>
               {option}
             </li>
           )}

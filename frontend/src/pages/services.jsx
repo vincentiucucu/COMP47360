@@ -60,7 +60,6 @@ function Services() {
 
   const handleDeleteConfirm = async () => {
     try {
-      console.log(deleteId)
       await deleteService(deleteId);
       await fetchServices();
       toast(<CustomToast header="SUCCESS" text="Service deleted successfully." />);

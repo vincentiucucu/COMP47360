@@ -12,7 +12,6 @@ L.Icon.Default.mergeOptions({
 
 const ServicesMap = ({ coordinates }) => {
   const mapRef = useRef(null);
-  console.log(coordinates)
   useEffect(() => {
     if (mapRef.current && coordinates.length > 0) {
       const map = mapRef.current;
