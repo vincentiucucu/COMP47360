@@ -1,34 +1,40 @@
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.generics import ListAPIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+
 from app01.models import Restriction
 from app01.serializers import RestrictionSerializer
-from rest_framework.filters import OrderingFilter, SearchFilter
-from app01.views.pagination import Pagination
-from app01.views.filters import RestrictionFilter
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from datetime import timedelta
-from django.utils.timezone import now
 
-class RestrictionView(ModelViewSet):
-    queryset = Restriction.objects.all()
+from django.http import JsonResponse, HttpResponseBadRequest
+from datetime import datetime
+
+from app01.utils.miscellaneous import to_nearest_hour
+
+
+class RestrictionView(ListAPIView):
     serializer_class = RestrictionSerializer
-    filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
-    filterset_class = RestrictionFilter
-    pagination_class = Pagination
-    search_fields = [
-        'restriction_street',
-        'restriction_fstreet',
-        'restriction_tstreet',
-    ]
-    ordering_fields = [
-        'restriction_ftime',
-        'restriction_ttime'
-    ]
-    ordering = ['-restriction_ftime','-restriction_ttime']
+    permission_classes = [IsAuthenticated]
 
-    @action(detail=False, methods=['get'])
-    def recent(self, request):
-        recent_restrictions = self.queryset.order_by('-restriction_id')[:10]
-        serializer = self.get_serializer(recent_restrictions, many=True)
-        return Response(serializer.data)
+    def get_queryset(self):
+        try:
+            user_date = self.request.query_params.get('date')
+            user_start_time = self.request.query_params.get('service_start_time')
+
+            if not user_date and not user_start_time:
+                return HttpResponseBadRequest('Service date and start time must be provided.')
+
+            try:
+                user_date = datetime.strptime(user_date, "%Y-%m-%d").date()
+                user_start_time = datetime.strptime(user_start_time, "%H:%M:%S").time()
+            except ValueError:
+                return HttpResponseBadRequest('Invalid datetime format.')
+            
+            start_datetime = to_nearest_hour(datetime.combine(user_date, user_start_time))
+            weekday = start_datetime.strftime('%A')
+
+
+
+        except Exception as e:
+            return JsonResponse({'Error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        return Restriction.objects.filter()
