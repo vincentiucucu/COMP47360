@@ -5,7 +5,6 @@ import { REFRESH_TOKEN } from "../constants"
 export const login = async (email, password) => {
   const route = "/login/";
   try {
-    console.log(`Email ${email} Password ${password}`)
     const response = await api.post(route, { 
       "business_email": email, 
       "password": password });

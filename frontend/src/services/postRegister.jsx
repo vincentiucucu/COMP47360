@@ -5,8 +5,6 @@ import { REFRESH_TOKEN } from "../constants"
 export const register = async (username, useremail, password) => {
   const route = "/signup/";
   try {
-    console.log(`UName ${username} Email ${useremail} Password ${password}`)
-
     const response = await api.post(route, 
       { 
         "business_name": username, 

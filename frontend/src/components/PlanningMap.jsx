@@ -19,7 +19,7 @@ const HeatmapLayer = ({ points }) => {
   return null;
 };
 
-const MapClickHandler = ({ csvGeoJsonData, setLayersCleared, setHoverEnabled }) => {
+const MapClickHandler = ({ csvGeoJsonData, setLayersCleared, setHoverEnabled, handleSelectedZone }) => {
   const map = useMapEvents({
     click: (e) => {
       const { lat, lng } = e.latlng;
@@ -40,6 +40,7 @@ const MapClickHandler = ({ csvGeoJsonData, setLayersCleared, setHoverEnabled }) 
       if (closestFeature) {
         const [centerLng, centerLat] = closestFeature.geometry.center_cor;
         map.setView([centerLat, centerLng], 18);
+        handleSelectedZone(closestFeature.geometry.zone_id)
         console.log(`Zone: ${closestFeature.geometry.zone}, Zone ID: ${closestFeature.geometry.zone_id}`);
       }
     },
@@ -85,7 +86,7 @@ const MarkerClickHandler = ({ setSelectedCord, setAddress }) => {
   return null;
 };
 
-const PlanningMap = ({ initialHeatMapCor, taxiZoneData, selectedZone, setSelectedCord, initialSelectedCord }) => {
+const PlanningMap = ({ initialHeatMapCor, taxiZoneData, selectedZone, setSelectedCord, initialSelectedCord, handleSelectedZone }) => {
   const [heatmapData, setHeatmapData] = useState([]);
   const [layersCleared, setLayersCleared] = useState(false);
   const [hoverEnabled, setHoverEnabled] = useState(true);
@@ -172,6 +173,7 @@ const PlanningMap = ({ initialHeatMapCor, taxiZoneData, selectedZone, setSelecte
           csvGeoJsonData={taxiZoneData}
           setLayersCleared={setLayersCleared}
           setHoverEnabled={setHoverEnabled}
+          handleSelectedZone={handleSelectedZone}
         />
       )}
       {selectedZone && <ZoneClickHandler selectedZone={selectedZone} />}

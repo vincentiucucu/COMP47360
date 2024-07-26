@@ -21,6 +21,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { login } from '../services/postLogin';
 import '../styles/Login.scss';
 import CustomToast from '../components/CustomToast';
+import AuthContext from '../components/AuthContext';
 
 const containerStyle = {
   bgcolor: 'white',
@@ -128,6 +129,7 @@ export default function SignIn() {
   const [loading, setLoading] = React.useState(false);
   const [showPassword, setShowPassword] = React.useState(false);
   const navigate = useNavigate();
+  const { login: authLogin } = React.useContext(AuthContext);
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
@@ -137,7 +139,6 @@ export default function SignIn() {
     e.preventDefault();
     if (loading) return; 
     setLoading(true);
-    console.log("Form submitted");
     const data = new FormData(e.currentTarget);
     const username = data.get("email");
     const password = data.get("password");
@@ -146,6 +147,7 @@ export default function SignIn() {
       const res = await login(username, password);
       
       if (res.status >= 200 && res.status < 300) {
+        authLogin(); 
         navigate("/services");
       } else {
         toast(<CustomToast />);

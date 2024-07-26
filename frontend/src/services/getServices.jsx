@@ -1,14 +1,40 @@
-import api from '../api';
+import api from "../api";
 
-function createData(id,business, date, time, unit, vendors, address, service_id) {
-  return { id,business, date, time, unit, vendors, address, service_id };
+function createData(
+  id,
+  business,
+  date,
+  time,
+  unit,
+  vendors,
+  address,
+  service_id,
+  location,
+  vendors_id
+) {
+  return {
+    id,
+    business,
+    date,
+    time,
+    unit,
+    vendors,
+    address,
+    service_id,
+    location,
+    vendors_id
+  };
 }
 
-const fetchBusinessUnits = async (setPastRows, setPresentRows, setLoading, setError) => {
+const fetchBusinessUnits = async (
+  setPastRows,
+  setPresentRows,
+  setLoading,
+  setError
+) => {
   setLoading(true);
   try {
-    const response = await api.get('/api/service/');
-    console.log(response)
+    const response = await api.get("/api/service/");
     const data = response.data.results;
     const today = new Date();
     const pastServices = [];
@@ -17,22 +43,35 @@ const fetchBusinessUnits = async (setPastRows, setPresentRows, setLoading, setEr
     data.forEach((item, index) => {
       const serviceDate = new Date(item.service_date);
       const endTime = new Date(`${item.service_date}T${item.service_end_time}`);
-      const vendors = item.service_vendors.map(vendor => 
-        `${vendor.vendor_name}`
-      ).join(', ');
+      const vendors = item.service_vendors
+        .map((vendor) => `${vendor.vendor_name}`)
+        .join(", ");
+
+      const vendors_id = item.service_vendors
+      .map((vendor) => `${vendor.vendor}`);
 
       const row = createData(
         index + 1,
         `${item.business}`,
-        serviceDate.toLocaleDateString('en-US', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' }),
+        serviceDate.toLocaleDateString("en-US", {
+          weekday: "short",
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        }),
         `${item.service_start_time} - ${item.service_end_time}`,
         `${item.unit}`,
         vendors,
         item.location_address,
-        item.service_id
+        item.service_id,
+        item.location_coords,
+        vendors_id
       );
 
-      if (serviceDate < today || (serviceDate.toDateString() === today.toDateString() && endTime < today)) {
+      if (
+        serviceDate < today ||
+        (serviceDate.toDateString() === today.toDateString() && endTime < today)
+      ) {
         pastServices.push(row);
       } else {
         presentServices.push(row);

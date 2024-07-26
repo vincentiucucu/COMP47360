@@ -19,6 +19,7 @@ import NotFound from "./pages/notFound";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { AuthProvider } from './components/AuthContext';
 
 function logout() {
   localStorage.clear();
@@ -34,6 +35,8 @@ function App() {
   return (
     <ErrorBoundary>
       <BrowserRouter>
+      <AuthProvider>
+
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LogIn />} />
@@ -72,6 +75,8 @@ function App() {
           />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        </AuthProvider>
+
       </BrowserRouter>
       <ToastContainer />
     </ErrorBoundary>

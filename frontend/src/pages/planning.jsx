@@ -37,7 +37,7 @@ const Planning = () => {
   const [businessUnit, setBusinessUnit] = useState(null);
   const [authorisedVendors, setAuthorisedVendors] = useState([]);
   const [areas, setAreas] = useState(null);
-  const [LocationCords, setLocationCords] = useState(null);
+  const [locationCords, setLocationCords] = useState(null);
   const [taxiZones, setTaxiZones] = useState(null);
   const [businessUnits, setBusinessUnits] = useState([]);
   const [vendors, setVendors] = useState([]);
@@ -62,22 +62,22 @@ const Planning = () => {
       return;
     }
 
-    if (!LocationCords) {
+    if (!locationCords) {
       toast(<CustomToast header="WARNING" text="Please select location on the map"/>);
       return;
     }
 
     const formData = {
-      unit: businessUnit,
-      vendors: authorisedVendors,
+      unit: businessUnits.find((business)=> business.unit_name === businessUnit)?.permit_id ,
+      vendors: vendors.filter(vendor => authorisedVendors.includes(vendor.vendor_name)).map(vendor => vendor.licence_id) ,
       service_date: selectedDate.format("YYYY-MM-DD"),
       service_start_time: selectedStartTime.format("HH:mm:ss"),
       service_end_time: selectedEndTime.format("HH:mm:ss"),
-      location_coords: `SRID=4326;POINT(${LocationCords.lng} ${LocationCords.lat})`,
+      location_coords: `SRID=4326;POINT(${locationCords.lng} ${locationCords.lat})`,
       location_address: areas,
       revenue: '-25',
     };
-
+    
     try {
       const result = await postService(formData);
       if (result) {
@@ -161,6 +161,12 @@ const Planning = () => {
     fetchData();
   }, [selectedDate, selectedStartTime, selectedEndTime]);
 
+  const handleSelectedZone = (zone_id) => 
+    {
+      const area = taxiZones.features.find((zone) => zone.geometry.zone_id === zone_id)?.geometry.zone;
+      setAreas(area)
+    }
+
   const formContainerStyle = {
     top: "75px",
     left: showPlanningBox ? "20px" : "-100vw",
@@ -220,8 +226,9 @@ const Planning = () => {
           initialHeatMapCor={coordinates}
           taxiZoneData={taxiZones}
           selectedZone={selectedZone}
-          selectedCord={LocationCords}
+          selectedCord={locationCords}
           setSelectedCord={setLocationCords}
+          handleSelectedZone={handleSelectedZone}
         />
       </Box>
 
@@ -287,7 +294,7 @@ const Planning = () => {
 
         <Autocomplete
           fullWidth
-          options={businessUnits ? businessUnits.map((unit) => unit.permit_id) : []}
+          options={businessUnits ? businessUnits.map((unit) => unit.unit_name) : []}
           value={businessUnit}
           onChange={(event, newValue) => {
             const newBusinessUnit = newValue;
@@ -336,8 +343,8 @@ const Planning = () => {
             )}
           >
             {vendors.map((vendor) => (
-              <MenuItem key={vendor.licence_id} value={vendor.licence_id}>
-                {vendor.licence_id}
+              <MenuItem key={vendor.vendor_name} value={vendor.vendor_name}>
+                {vendor.vendor_name}
               </MenuItem>
             ))}
           </Select>

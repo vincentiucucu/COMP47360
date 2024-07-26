@@ -2,7 +2,7 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import { DataGrid } from '@mui/x-data-grid';
 
-export default function DataGridDemo({rows, columns}) {
+export default function DataGridDemo({ rows, columns, handleCellEditCommit }) {
   return (
     <Box sx={{ height: 'auto', width: 'auto' }}>
       <DataGrid
@@ -19,6 +19,10 @@ export default function DataGridDemo({rows, columns}) {
         checkboxSelection
         disableRowSelectionOnClick
         autoHeight
+        onCellEditCommit={(params) => {
+          console.log("Cell Edit Commit in DataGridDemo: ", params);
+          handleCellEditCommit(params);
+        }} 
       />
     </Box>
   );

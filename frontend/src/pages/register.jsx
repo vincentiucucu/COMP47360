@@ -114,6 +114,8 @@ export default function Register() {
   const [loading, setLoading] = React.useState(false);
   const [showPassword, setShowPassword] = React.useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
+  const [emailError, setEmailError] = React.useState('');
+  const [passwordStrength, setPasswordStrength] = React.useState('');
   const navigate = useNavigate();
 
   const handleClickShowPassword = () => {
@@ -122,6 +124,27 @@ export default function Register() {
 
   const handleClickShowConfirmPassword = () => {
     setShowConfirmPassword(!showConfirmPassword);
+  };
+
+  const handleEmailChange = (e) => {
+    const email = e.target.value;
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setEmailError('Invalid email address');
+    } else {
+      setEmailError('');
+    }
+  };
+
+  const handlePasswordChange = (e) => {
+    const password = e.target.value;
+    let strength = 'Weak';
+    if (password.length >= 8) {
+      strength = 'Medium';
+      if (/[A-Z]/.test(password) && /\d/.test(password) && /[@$!%*?&#]/.test(password)) {
+        strength = 'Strong';
+      }
+    }
+    setPasswordStrength(strength);
   };
 
   const handleSubmit = async (e) => {
@@ -134,23 +157,38 @@ export default function Register() {
     const password = data.get('new-password');
     const passwordConf = data.get('confirm-password');
 
+    if (emailError) {
+      toast.error(emailError, {
+        position: 'top-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      setLoading(false);
+      return;
+    }
+
+    if (password !== passwordConf) {
+      toast.error('Passwords do not match. Please try again.', {
+        position: 'top-right',
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      setLoading(false);
+      return;
+    }
+
     try {
-      if (password !== passwordConf) {
-        toast.error('Passwords do not match. Please try again.', {
-          position: 'top-right',
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-        });
-        setLoading(false);
-        return;
-      }
       const res = await register(businessName, businessEmail, password);
       if (res.status >= 200 && res.status < 300) {
-        navigate('/services');
+        navigate('/login');
       } else {
         toast(<CustomToast />);
       }
@@ -194,6 +232,9 @@ export default function Register() {
                   name="email"
                   autoComplete="email"
                   sx={textFieldStyle}
+                  onChange={handleEmailChange}
+                  error={!!emailError}
+                  helperText={emailError}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -206,6 +247,7 @@ export default function Register() {
                   id="newPassword"
                   autoComplete="new-password"
                   sx={textFieldStyle}
+                  onChange={handlePasswordChange}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
@@ -220,6 +262,11 @@ export default function Register() {
                     ),
                   }}
                 />
+                {passwordStrength && (
+                  <Typography sx={{fontSize:'11px', mt:'5px', ml:'15px'}}  variant="body2" color={passwordStrength === 'Strong' ? 'green' : passwordStrength === 'Medium' ? 'orange' : 'red'}>
+                    Password Strength: {passwordStrength}
+                  </Typography>
+                )}
               </Grid>
               <Grid item xs={12}>
                 <TextField

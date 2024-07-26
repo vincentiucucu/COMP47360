@@ -1,9 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { Button, Box, Typography, Grid, IconButton, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from "@mui/material";
+import {
+  Button,
+  Box,
+  Typography,
+  Grid,
+  IconButton,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  TextField,
+} from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import AppBar from "../components/HamburgerBox";
 import DataGrid from "../components/DataGrid";
+import Calendar from "../components/Calendar";
 import { useNavigate } from "react-router-dom";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import GroupIcon from "@mui/icons-material/Group";
@@ -14,10 +29,13 @@ import postBusinessUnit from "../services/postBusinessUnit";
 import postVendor from "../services/postVendor";
 import deleteBusinessUnit from "../services/deleteBusinessUnit";
 import deleteVendor from "../services/deleteVendor";
+import putBusinessUnit from "../services/putBusinessUnit";
+import putVendor from "../services/putVendor"; 
 import AddDialog from "../components/AddDialog";
 import CustomToast from "../components/CustomToast";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import dayjs from 'dayjs';
 
 const buttonStyles = {
   textTransform: "none",
@@ -80,99 +98,118 @@ export default function Business() {
   const [deleteId, setDeleteId] = useState(null); 
   const [deleteType, setDeleteType] = useState(""); 
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false); 
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editRow, setEditRow] = useState(null); 
+  const [editDialogType, setEditDialogType] = useState(""); 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const businessData = await getBusinessUnits();
-        const vendorData = await getVendors();
-        setBusinessRows(businessData);
-        setVendorRows(vendorData);
-        setNextBusinessId(businessData.length + 1);
-        setNextVendorId(vendorData.length + 1);
-      } catch (error) {
-        toast(<CustomToast />);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const businessData = await getBusinessUnits();
+      const vendorData = await getVendors();
+      setBusinessRows(businessData);
+      setVendorRows(vendorData);
+      setNextBusinessId(businessData.length + 1);
+      setNextVendorId(vendorData.length + 1);
+    } catch (error) {
+      toast(<CustomToast />);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchData();
   }, []);
 
   const businessColumns = [
     { field: "id", headerName: "ID", width: 90 },
-    { field: "business", headerName: "Business", width: 150, editable: true },
-    { field: "unit_name", headerName: "Unit Name", width: 150, editable: true },
-    { field: "permit_id", headerName: "Permit ID", width: 120, editable: true },
+    { field: "business", headerName: "Business", width: 150, editable: false },
+    { field: "unit_name", headerName: "Unit Name", width: 150, editable: false },
+    { field: "permit_id", headerName: "Permit ID", width: 120, editable: false },
     {
       field: "permit_expiry_date",
       headerName: "Permit Expiry Date",
       width: 150,
-      editable: true,
+      editable: false,
     },
-    { field: "unit_type", headerName: "Unit Type", width: 100, editable: true },
+    { field: "unit_type", headerName: "Unit Type", width: 100, editable: false },
     {
       field: "actions",
       headerName: "Actions",
-      width: 60,
+      width: 120,
       renderCell: (params) => (
-        <IconButton
-          color="error"
-          onClick={() => handleDeleteClick(params.row.permit_id, "business")}
-        >
-          <DeleteIcon />
-        </IconButton>
+        <>
+          <IconButton
+            color="primary"
+            onClick={() => handleEditClick(params.row, "business")}
+          >
+            <EditIcon />
+          </IconButton>
+          <IconButton
+            color="error"
+            onClick={() => handleDeleteClick(params.row.permit_id, "business")}
+          >
+            <DeleteIcon />
+          </IconButton>
+        </>
       ),
     },
   ];
 
   const vendorColumns = [
     { field: "id", headerName: "ID", width: 90 },
-    { field: "business", headerName: "Business", width: 150, editable: true },
+    { field: "business", headerName: "Business", width: 150, editable: false },
     {
       field: "vendor_name",
       headerName: "Vendor Name",
       width: 150,
-      editable: true,
+      editable: false,
     },
     {
       field: "licence_id",
       headerName: "Licence ID",
       width: 120,
-      editable: true,
+      editable: false,
     },
     {
       field: "licence_expiry_date",
       headerName: "Expiry Date",
       width: 130,
-      editable: true,
+      editable: false,
     },
     {
       field: "vendor_email",
       headerName: "Vendor Email",
       width: 200,
-      editable: true,
+      editable: false,
     },
     {
       field: "vendor_phone_number",
       headerName: "Phone Number",
       width: 150,
-      editable: true,
+      editable: false,
     },
     {
       field: "actions",
       headerName: "Actions",
-      width: 60,
+      width: 120,
       renderCell: (params) => (
-        <IconButton
-          color="error"
-          onClick={() => handleDeleteClick(params.row.licence_id, "vendor")}
-        >
-          <DeleteIcon />
-        </IconButton>
+        <>
+          <IconButton
+            color="primary"
+            onClick={() => handleEditClick(params.row, "vendor")}
+          >
+            <EditIcon />
+          </IconButton>
+          <IconButton
+            color="error"
+            onClick={() => handleDeleteClick(params.row.licence_id, "vendor")}
+          >
+            <DeleteIcon />
+          </IconButton>
+        </>
       ),
     },
   ];
@@ -243,6 +280,76 @@ export default function Business() {
     } finally {
       setLoading(false);
       setOpenDeleteDialog(false);
+    }
+  };
+
+  const handleEditClick = (row, type) => {
+    if (type === "business") {
+      setEditRow({ ...row, permit_expiry_date: dayjs(row.permit_expiry_date) });
+    } else if (type === "vendor") {
+      setEditRow({ ...row, licence_expiry_date: dayjs(row.licence_expiry_date) });
+    }
+    setEditDialogType(type);
+    setEditDialogOpen(true);
+  };
+
+  const handleEditChange = (field, value) => {
+    setEditRow((prevRow) => ({
+      ...prevRow,
+      [field]: value,
+    }));
+  };
+
+  const handleEditConfirm = async () => {
+    if (editDialogType === "business") {
+      const { id, permit_id, unit_name, unit_type, permit_expiry_date } = editRow;
+      const updatedData = {
+        permit_id,
+        unit_name,
+        unit_type,
+        permit_expiry_date: permit_expiry_date.format("YYYY-MM-DD"),
+      };
+
+      try {
+        await putBusinessUnit(permit_id, updatedData);
+        await fetchData();
+        toast(
+          <CustomToast header="SUCCESS" text="Business unit updated successfully." />
+        );
+        setEditDialogOpen(false);
+      } catch (error) {
+        toast(
+          <CustomToast
+            header="ERROR"
+            text="Failed to update business unit. Please try again."
+          />
+        );
+      }
+    } else if (editDialogType === "vendor") {
+      const { id, licence_id, vendor_name, licence_expiry_date, vendor_email, vendor_phone_number } = editRow;
+      const updatedData = {
+        licence_id,
+        vendor_name,
+        licence_expiry_date: licence_expiry_date.format("YYYY-MM-DD"),
+        vendor_email,
+        vendor_phone_number,
+      };
+
+      try {
+        await putVendor(licence_id, updatedData);
+        await fetchData();
+        toast(
+          <CustomToast header="SUCCESS" text="Vendor updated successfully." />
+        );
+        setEditDialogOpen(false);
+      } catch (error) {
+        toast(
+          <CustomToast
+            header="ERROR"
+            text="Failed to update vendor. Please try again."
+          />
+        );
+      }
     }
   };
 
@@ -345,6 +452,100 @@ export default function Business() {
           </Button>
           <Button onClick={handleDeleteConfirm} color="error">
             Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)}>
+        <DialogTitle>Edit {editDialogType === "business" ? "Business Unit" : "Vendor"}</DialogTitle>
+        <DialogContent>
+          {editDialogType === "business" ? (
+            <>
+              <TextField
+                margin="dense"
+                label="Business"
+                fullWidth
+                value={editRow?.business || ""}
+                onChange={(e) => handleEditChange("business", e.target.value)}
+              />
+              <TextField
+                margin="dense"
+                label="Unit Name"
+                fullWidth
+                value={editRow?.unit_name || ""}
+                onChange={(e) => handleEditChange("unit_name", e.target.value)}
+              />
+              <TextField
+                margin="dense"
+                label="Permit ID"
+                fullWidth
+                value={editRow?.permit_id || ""}
+                onChange={(e) => handleEditChange("permit_id", e.target.value)}
+              />
+              <Calendar
+                label="Permit Expiry Date"
+                value={editRow?.permit_expiry_date || dayjs()} 
+                onDateChange={(newValue) => handleEditChange("permit_expiry_date", newValue)}
+              />
+              <TextField
+                margin="dense"
+                label="Unit Type"
+                fullWidth
+                value={editRow?.unit_type || ""}
+                onChange={(e) => handleEditChange("unit_type", e.target.value)}
+              />
+            </>
+          ) : (
+            <>
+              <TextField
+                margin="dense"
+                label="Business"
+                fullWidth
+                value={editRow?.business || ""}
+                onChange={(e) => handleEditChange("business", e.target.value)}
+              />
+              <TextField
+                margin="dense"
+                label="Vendor Name"
+                fullWidth
+                value={editRow?.vendor_name || ""}
+                onChange={(e) => handleEditChange("vendor_name", e.target.value)}
+              />
+              <TextField
+                margin="dense"
+                label="Licence ID"
+                fullWidth
+                value={editRow?.licence_id || ""}
+                onChange={(e) => handleEditChange("licence_id", e.target.value)}
+              />
+              <Calendar
+                label="Licence Expiry Date"
+                value={editRow?.licence_expiry_date || dayjs()} 
+                onDateChange={(newValue) => handleEditChange("licence_expiry_date", newValue)}
+              />
+              <TextField
+                margin="dense"
+                label="Vendor Email"
+                fullWidth
+                value={editRow?.vendor_email || ""}
+                onChange={(e) => handleEditChange("vendor_email", e.target.value)}
+              />
+              <TextField
+                margin="dense"
+                label="Vendor Phone Number"
+                fullWidth
+                value={editRow?.vendor_phone_number || ""}
+                onChange={(e) => handleEditChange("vendor_phone_number", e.target.value)}
+              />
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditDialogOpen(false)} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleEditConfirm} color="primary">
+            Save
           </Button>
         </DialogActions>
       </Dialog>

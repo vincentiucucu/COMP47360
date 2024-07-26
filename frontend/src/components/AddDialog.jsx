@@ -51,7 +51,7 @@ const AddDialog = ({ open, handleClose, handleAdd, type }) => {
                   fullWidth
                   label={key.replace('_', ' ')}
                   name={key}
-                  value={formState[key] || ''} // Ensure the value is always a string
+                  value={formState[key] || ''} 
                   onChange={handleChange}
                   required
                 />
