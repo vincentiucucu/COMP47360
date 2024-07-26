@@ -41,7 +41,7 @@ def get_recommendations(request):
             
         start_datetime = to_nearest_hour(datetime.combine(user_date, user_start_time))
         end_datetime = to_nearest_hour(datetime.combine(user_date, user_end_time))
-        mid_datetime = start_datetime + (end_datetime - start_datetime) / 2 
+        mid_datetime = to_nearest_hour(start_datetime + (end_datetime - start_datetime) / 2)
 
         # Generate recommendations
         try:
