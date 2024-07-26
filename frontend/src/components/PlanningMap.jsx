@@ -92,7 +92,7 @@ const PlanningMap = ({ initialHeatMapCor, zoneRecommendationData, taxiZoneData, 
   const [hoverEnabled, setHoverEnabled] = useState(true);
   const [selectedCord, setSelectedCordState] = useState(initialSelectedCord || null);
   const [address, setAddress] = useState("");
-  const [selectedMarker, setSelectedMarker] = useState(null); // New state to track selected marker
+  const [selectedMarker, setSelectedMarker] = useState(null); 
   const mapRef = useRef(null);
   console.log(zoneRecommendationData);
 
@@ -196,7 +196,7 @@ const PlanningMap = ({ initialHeatMapCor, zoneRecommendationData, taxiZoneData, 
               click: () => {
                 onMarkerClick(item.properties.street_address);
                 setAddress(item.properties.street_address);
-                setSelectedMarker(index); // Set the selected marker index
+                setSelectedMarker(index); 
               },
             }}
             icon={L.divIcon({
