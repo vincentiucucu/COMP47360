@@ -1,7 +1,8 @@
-from app01.models import Business,BusinessUnit,Vendor,Service,Log,ServiceVendor,ZonedStreet,Restriction,ZoneBusynessScore,Event
+from .models import Business, BusinessUnit, Vendor, Service, Log, ServiceVendor, ZonedStreet, Restriction, ZoneBusynessScore, StreetBusynessScore, Event
 from rest_framework import serializers
-from django.contrib.gis.geos import Point, MultiPolygon, Polygon, MultiLineString, LineString
+# from django.contrib.gis.geos import Point, MultiLineString, LineString
 
+# utility function for GeoJSON representation
 def to_geojson(service):
     return {
         "type": "Feature",
@@ -45,6 +46,7 @@ class VendorSerializer(serializers.ModelSerializer):
         model = Vendor
         fields = ['licence_id', 'vendor_name', 'licence_expiry_date', 'vendor_email', 'vendor_phone_number', 'business']
         read_only_fields = ['business']
+
 
 class ServiceVendorSerializer(serializers.ModelSerializer):
     vendor_name = serializers.CharField(source='vendor.vendor_name', read_only=True)
@@ -100,44 +102,30 @@ class RestrictionSerializer(serializers.ModelSerializer):
             'restriction_street','restriction_fstreet','restriction_tstreet','restriction_street_geometry','restriction_weekday','restriction_ftime','restriction_ttime'
         ]
 
-    def get_restriction_street_geometry(self, obj):
-        if isinstance(obj.restriction_street_geometry, MultiLineString):
-            return obj.restriction_street_geometry.geojson
-        return obj.restriction_street_geometry
+    # def get_restriction_street_geometry(self, obj):
+    #     if isinstance(obj.restriction_street_geometry, MultiLineString):
+    #         return obj.restriction_street_geometry.geojson
+    #     return obj.restriction_street_geometry
 
-    def to_internal_value(self, data):
-        restriction_street_geometry = data.get('restriction_street_geometry')
-        if restriction_street_geometry:
-            try:
-                # Assuming the input is a GeoJSON string or similar
-                geom = MultiLineString(restriction_street_geometry)
-                data['restriction_street_geometry'] = geom
-            except (ValueError, TypeError):
-                raise serializers.ValidationError({
-                    'restriction_street_geometry': 'Invalid format for restriction_street_geometry.'
-                })
-        return super().to_internal_value(data)
-
+    # def to_internal_value(self, data):
+    #     restriction_street_geometry = data.get('restriction_street_geometry')
+    #     if restriction_street_geometry:
+    #         try:
+    #             # Assuming the input is a GeoJSON string or similar
+    #             geom = MultiLineString(restriction_street_geometry)
+    #             data['restriction_street_geometry'] = geom
+    #         except (ValueError, TypeError):
+    #             raise serializers.ValidationError({
+    #                 'restriction_street_geometry': 'Invalid format for restriction_street_geometry.'
+    #             })
+    #     return super().to_internal_value(data)
 
 
 class ZoneBusynessScoreSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = ZoneBusynessScore
         fields = ['score','zone','hour','centroid']
-
-
-
-    def to_internal_value(self, data):
-        centroid = data.get('centroid')
-        if centroid:
-            try:
-                lat, lng = map(float, centroid.split(',')[:2])
-                data['centroid'] = Point(lng, lat)
-            except (ValueError, TypeError):
-                raise serializers.ValidationError({
-                    'centroid': 'Invalid format for centroid. It should be "lat,lng".'
-                })
-        return super().to_internal_value(data)
 
 
 class ZonedStreetSerializer(serializers.ModelSerializer):
@@ -145,32 +133,32 @@ class ZonedStreetSerializer(serializers.ModelSerializer):
         model = ZonedStreet
         fields = ['street_address','street_geometry','street_centroid','zone_id']
 
-    def to_internal_value(self, data):
-        street_centroid = data.get('street_centroid')
-        if street_centroid:
-            try:
-                lat, lng = map(float, street_centroid.split(',')[:2])
-                data['street_centroid'] = Point(lng, lat)
-            except (ValueError, TypeError):
-                raise serializers.ValidationError({
-                    'street_centroid': 'Invalid format for street_centroid. It should be "lat,lng".'
-                })
+    # def to_internal_value(self, data):
+    #     street_centroid = data.get('street_centroid')
+    #     if street_centroid:
+    #         try:
+    #             lat, lng = map(float, street_centroid.split(',')[:2])
+    #             data['street_centroid'] = Point(lng, lat)
+    #         except (ValueError, TypeError):
+    #             raise serializers.ValidationError({
+    #                 'street_centroid': 'Invalid format for street_centroid. It should be "lat,lng".'
+    #             })
 
-        street_geometry = data.get('street_geometry')
+    #     street_geometry = data.get('street_geometry')
 
-        if street_geometry:
-            try:
-                lines = []
-                for line_data in street_geometry:
-                    line = LineString(*line_data)
-                    lines.append(line)
-                data['street_geometry'] = MultiLineString(*lines)
-            except (ValueError, TypeError):
-                raise serializers.ValidationError({
-                    'street_geometry': 'Invalid format for street_geometry. It should be a list of linestrings.'
-                })
+    #     if street_geometry:
+    #         try:
+    #             lines = []
+    #             for line_data in street_geometry:
+    #                 line = LineString(*line_data)
+    #                 lines.append(line)
+    #             data['street_geometry'] = MultiLineString(*lines)
+    #         except (ValueError, TypeError):
+    #             raise serializers.ValidationError({
+    #                 'street_geometry': 'Invalid format for street_geometry. It should be a list of linestrings.'
+    #             })
 
-        return super().to_internal_value(data)
+    #     return super().to_internal_value(data)
 
 
 class EventSerializer(serializers.ModelSerializer):
@@ -178,14 +166,21 @@ class EventSerializer(serializers.ModelSerializer):
         model = Event
         fields = ['event_name','start','end','location']
 
-    def to_internal_value(self, data):
-        location = data.get('location')
-        if location:
-            try:
-                lat, lng = map(float, location.split(',')[:2])
-                data['location'] = Point(lng, lat)
-            except (ValueError, TypeError):
-                raise serializers.ValidationError({
-                    'location': 'Invalid format for location. It should be "lat,lng".'
-                })
-        return super().to_internal_value(data)
+    # def to_internal_value(self, data):
+    #     location = data.get('location')
+    #     if location:
+    #         try:
+    #             lat, lng = map(float, location.split(',')[:2])
+    #             data['location'] = Point(lng, lat)
+    #         except (ValueError, TypeError):
+    #             raise serializers.ValidationError({
+    #                 'location': 'Invalid format for location. It should be "lat,lng".'
+    #             })
+    #     return super().to_internal_value(data)
+
+
+class StreetBusynessScoreSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = StreetBusynessScore
+        fields = ['zoned_street_centroid', 'hour', 'score', 'zone_id']
