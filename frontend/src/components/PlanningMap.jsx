@@ -40,7 +40,7 @@ const MapClickHandler = ({ csvGeoJsonData, setLayersCleared, setHoverEnabled, ha
       if (closestFeature) {
         const [centerLng, centerLat] = closestFeature.geometry.center_cor;
         map.setView([centerLat, centerLng], 18);
-        handleSelectedZone(closestFeature.geometry.zone_id)
+        handleSelectedZone(closestFeature.geometry.zone_id);
         console.log(`Zone: ${closestFeature.geometry.zone}, Zone ID: ${closestFeature.geometry.zone_id}`);
       }
     },
@@ -86,13 +86,14 @@ const MarkerClickHandler = ({ setSelectedCord, setAddress }) => {
   return null;
 };
 
-const PlanningMap = ({ initialHeatMapCor, taxiZoneData, selectedZone, setSelectedCord, initialSelectedCord, handleSelectedZone }) => {
+const PlanningMap = ({ initialHeatMapCor, zoneRecommendationData, taxiZoneData, selectedZone, setSelectedCord, initialSelectedCord, handleSelectedZone, onMarkerClick }) => {
   const [heatmapData, setHeatmapData] = useState([]);
   const [layersCleared, setLayersCleared] = useState(false);
   const [hoverEnabled, setHoverEnabled] = useState(true);
   const [selectedCord, setSelectedCordState] = useState(initialSelectedCord || null);
-  const [address, setAddress] = useState('');
+  const [address, setAddress] = useState("");
   const mapRef = useRef(null);
+  console.log(zoneRecommendationData);
 
   useEffect(() => {
     if (initialHeatMapCor && initialHeatMapCor.length > 0) {
@@ -107,7 +108,7 @@ const PlanningMap = ({ initialHeatMapCor, taxiZoneData, selectedZone, setSelecte
 
   useEffect(() => {
     if (selectedZone && mapRef.current) {
-      const [centerLng, centerLat] = selectedZone.geometry.center_cor;
+      const [centerLng, centerLat] = selectedZone.geometry?.center_cor;
       mapRef.current.setView([centerLat, centerLng], 18);
     }
   }, [selectedZone]);
@@ -121,12 +122,12 @@ const PlanningMap = ({ initialHeatMapCor, taxiZoneData, selectedZone, setSelecte
 
   const onEachFeature = (feature, layer) => {
     layer.setStyle({
-      color: "#808080", 
+      color: "#808080",
       dashArray: "",
       fillOpacity: 0.2,
-      fillColor: "#808080", 
+      fillColor: "#808080",
     });
-    
+
     if (hoverEnabled) {
       layer.on({
         mouseover: (e) => {
@@ -141,10 +142,10 @@ const PlanningMap = ({ initialHeatMapCor, taxiZoneData, selectedZone, setSelecte
         mouseout: (e) => {
           const layer = e.target;
           layer.setStyle({
-            color: "#808080", 
+            color: "#808080",
             dashArray: "",
             fillOpacity: 0.2,
-            fillColor: "#808080", 
+            fillColor: "#808080",
           });
         },
       });
@@ -162,7 +163,7 @@ const PlanningMap = ({ initialHeatMapCor, taxiZoneData, selectedZone, setSelecte
     <MapContainer
       center={center}
       zoom={zoom}
-      style={{ height: "100%", width: "100%", position: 'absolute', zIndex: -1 }} 
+      style={{ height: "100%", width: "100%", position: "absolute", zIndex: -1 }}
       whenCreated={handleMapLoad}
     >
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
@@ -177,16 +178,44 @@ const PlanningMap = ({ initialHeatMapCor, taxiZoneData, selectedZone, setSelecte
         />
       )}
       {selectedZone && <ZoneClickHandler selectedZone={selectedZone} />}
-      <MarkerClickHandler setSelectedCord={(coords) => {
+      <MarkerClickHandler
+        setSelectedCord={(coords) => {
           setSelectedCordState(coords);
-          setSelectedCord(coords); 
-        }} 
-        setAddress={setAddress} />
-      {selectedCord && (
+          setSelectedCord(coords);
+        }}
+        setAddress={setAddress}
+      />
+      {/* {selectedCord && (
         <Marker position={[selectedCord.lat, selectedCord.lng]}>
           <Popup>{address}</Popup>
         </Marker>
-      )}
+      )} */}
+      {zoneRecommendationData &&
+        zoneRecommendationData.length > 0 &&
+        zoneRecommendationData.map((item, index) => (
+          <Marker
+            key={index}
+            position={[item.geometry.coordinates[1], item.geometry.coordinates[0]]}
+            eventHandlers={{
+              click: () => {
+                onMarkerClick(item.properties.street_address);
+                setAddress(item.properties.street_address);
+              },
+            }}
+            icon={L.divIcon({
+              className: "custom-marker",
+              html: `<div style="background-color: #FF6347; width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold;">${item.properties.score.toFixed(2)}</div>`,
+            })}
+          >
+            <Popup>
+              <div>
+                <strong>Address:</strong> {item.properties.street_address}
+                <br />
+                <strong>Score:</strong> {item.properties.score.toFixed(2)}/10.00
+              </div>
+            </Popup>
+          </Marker>
+        ))}
     </MapContainer>
   );
 };

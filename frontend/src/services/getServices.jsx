@@ -34,8 +34,8 @@ const fetchBusinessUnits = async (
 ) => {
   setLoading(true);
   try {
-    const response = await api.get("/api/service/");
-    const data = response.data.results;
+    const response = await api.get("/api/services/");
+    const data = response.data;
     const today = new Date();
     const pastServices = [];
     const presentServices = [];

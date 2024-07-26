@@ -13,6 +13,7 @@ const buttonHoverEffect = keyframes`
 
 const buttonStyle = {
   textAlign: "center",
+  textAlign: "start",
   p: "10px",
   transition: "background-color 0.3s, box-shadow 0.3s",
   "&:hover": {
@@ -75,13 +76,14 @@ const Main = () => {
         top: "0px",
         left: "0px",
         p: "20px",
+        // height: {xs:'100vh', md:'100%'}
       }}
     >
       <Box
         sx={{
           backgroundColor: "#333333",
           color: "white",
-          height: "100%",
+          height: { xs: "100vh", md: "100%" },
           width: "100%",
           mb: "4px",
         }}
@@ -99,11 +101,15 @@ const Main = () => {
             <Typography
               variant="h2"
               sx={{
+                mt: {
+                  xs: "30px",
+                  md: "-40px",
+                },
                 fontWeight: "bold",
                 fontSize: {
                   xs: "2rem",
-                  sm: "3rem",
-                  md: "4rem",
+                  sm: "2.5rem",
+                  md: "3rem",
                 },
               }}
             >
@@ -112,6 +118,7 @@ const Main = () => {
             <Typography
               variant="h5"
               sx={{
+                color: "#9A9999",
                 marginTop: "10px",
                 marginBottom: "20px",
                 fontSize: {
@@ -125,7 +132,7 @@ const Main = () => {
               Business
             </Typography>
           </Grid>
-          <Grid item xs={12} md={4}>
+          <Grid sx={{alignContent:'center'}} item xs={12} md={4}>
             <Grid
               item
               xs={12}
@@ -149,6 +156,7 @@ const Main = () => {
               <Typography
                 variant="body1"
                 sx={{
+                  color: "#9A9999",
                   marginBottom: "20px",
                   fontSize: {
                     xs: "0.875rem",
@@ -183,6 +191,7 @@ const Main = () => {
               <Typography
                 variant="body1"
                 sx={{
+                  color: "#9A9999",
                   marginBottom: "20px",
                   fontSize: {
                     xs: "0.875rem",
@@ -217,6 +226,7 @@ const Main = () => {
               <Typography
                 variant="body1"
                 sx={{
+                  color: "#9A9999",
                   marginBottom: "20px",
                   fontSize: {
                     xs: "0.875rem",
@@ -240,12 +250,12 @@ const Main = () => {
               alt="Overview"
               style={{
                 width: "100%",
-                maxWidth: "550px",
+                maxWidth: "784px",
                 justifyContent: "start",
               }}
             />
           </Grid>
-          <Grid item xs={12} sx={{ textAlign: "center", marginTop: "40px" }}>
+          <Grid item xs={12} sx={{ textAlign: "center", marginTop: "0px" }}>
             <Button
               variant="contained"
               sx={{
@@ -253,6 +263,7 @@ const Main = () => {
                 color: "white",
                 padding: "10px 20px",
                 fontSize: "18px",
+                borderRadius: "10px",
                 "&:hover": { backgroundColor: "darkorange" },
               }}
               href="/login"

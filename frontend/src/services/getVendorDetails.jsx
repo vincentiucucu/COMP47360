@@ -2,8 +2,8 @@ import api from '../api';
 
 const getVendors = async () => {
   try {
-    const response = await api.get('/api/vendor/');
-    const formattedData = response.data.results.map((item, index) => ({
+    const response = await api.get('/api/vendors/');
+    const formattedData = response.data.map((item, index) => ({
       id: index + 1,
       business: item.business,
       vendor_name: item.vendor_name,

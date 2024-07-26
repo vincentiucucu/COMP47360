@@ -2,8 +2,9 @@ import api from '../api';
 
 const getBusinessUnits = async () => {
   try {
-    const response = await api.get('/api/business_unit/');
-    const formattedData = response.data.results.map((item, index) => ({
+    const response = await api.get('/api/business_units/');
+    console.log(response)
+    const formattedData = response.data.map((item, index) => ({
       id: index + 1,
       business: item.business,
       unit_name: item.unit_name,

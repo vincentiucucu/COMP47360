@@ -11,6 +11,7 @@ import {
   DialogContentText,
   DialogTitle,
   TextField,
+  CircularProgress,
 } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import AddIcon from "@mui/icons-material/Add";
@@ -21,6 +22,7 @@ import ServicesMap from "../components/ServicesMap";
 import DataGridDemo from "../components/DataGrid";
 import Calendar from "../components/Calendar";
 import CustomToast from "../components/CustomToast";
+import Time from "../components/Time";
 import { toast } from "react-toastify";
 import dayjs from "dayjs";
 import getServicesLocations from "../services/getServicesLocations";
@@ -44,6 +46,7 @@ function Services() {
   const formData = location.state?.formData;
 
   const fetchServices = async () => {
+    setLoading(true);
     try {
       await getServices(setPastRows, setPresentRows, setLoading, setError);
       await getServicesLocations(setCoordinates, setLoading, setError);
@@ -54,6 +57,8 @@ function Services() {
           text="Failed to fetch services data. Please try again."
         />
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -71,6 +76,7 @@ function Services() {
   };
 
   const handleDeleteConfirm = async () => {
+    setLoading(true);
     try {
       await deleteService(deleteId);
       await fetchServices();
@@ -85,19 +91,18 @@ function Services() {
         />
       );
     } finally {
+      setLoading(false);
       setOpenDialog(false);
     }
   };
 
   const handleEditClick = (row) => {
     const [startTime, endTime] = row.time.split(" - ");
-    setEditRow({ ...row, date: dayjs(row.date),service_start_time: startTime,
-      service_end_time: endTime });
+    setEditRow({ ...row, date: dayjs(row.date), service_start_time: dayjs(startTime, "HH:mm:ss"), service_end_time: dayjs(endTime, "HH:mm:ss") });
     setEditDialogOpen(true);
   };
 
   const handleEditChange = (field, value) => {
-    console.log(editRow)
     setEditRow((prevRow) => {
       return {
         ...prevRow,
@@ -107,6 +112,7 @@ function Services() {
   };
 
   const handleEditConfirm = async () => {
+    setLoading(true);
     const {
       service_id,
       business,
@@ -122,8 +128,8 @@ function Services() {
 
     const updatedData = {
       service_date: date.format("YYYY-MM-DD"),
-      service_start_time: service_start_time,
-      service_end_time: service_end_time,
+      service_start_time: service_start_time.format("HH:mm:ss"),
+      service_end_time: service_end_time.format("HH:mm:ss"),
       location_coords: location,
       location_address: address,
       revenue: "-9726.5",
@@ -132,7 +138,6 @@ function Services() {
     };
 
     try {
-      console.log(service_id)
       await putService(service_id, updatedData);
       await fetchServices();
       toast(
@@ -146,6 +151,8 @@ function Services() {
           text="Failed to update service. Please try again."
         />
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -248,72 +255,85 @@ function Services() {
           </Typography>
         </Box>
 
-        <Grid
-          container
-          spacing={2}
-          sx={{ height: "100%", paddingBottom: "30px" }}
-        >
-          <Grid item xs={12} lg={8}>
-            <Box sx={gridBoxStyle}>
-              <Box
-                sx={{
-                  p: "10px 0px",
-                  display: "grid",
-                  gridTemplateColumns: "auto 1fr",
-                  alignSelf: "start",
-                }}
-              >
-                <Typography sx={headerTypographyStyle}>
-                  Planned Services
-                </Typography>
-                <Button
-                  startIcon={<AddIcon />}
-                  sx={buttonStyles}
-                  onClick={handleAddClick}
+        {loading ? (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%",
+            }}
+          >
+            <CircularProgress />
+          </Box>
+        ) : (
+          <Grid
+            container
+            spacing={2}
+            sx={{ height: "100%", paddingBottom: "30px" }}
+          >
+            <Grid item xs={12} lg={8}>
+              <Box sx={gridBoxStyle}>
+                <Box
+                  sx={{
+                    p: "10px 0px",
+                    display: "grid",
+                    gridTemplateColumns: "auto 1fr",
+                    alignSelf: "start",
+                  }}
                 >
-                  Add
-                </Button>
+                  <Typography sx={headerTypographyStyle}>
+                    Planned Services
+                  </Typography>
+                  <Button
+                    startIcon={<AddIcon />}
+                    sx={buttonStyles}
+                    onClick={handleAddClick}
+                  >
+                    Add
+                  </Button>
+                </Box>
+                <Box sx={dataGridBoxStyle}>
+                  <DataGridDemo rows={presentRows} columns={columns} />
+                </Box>
               </Box>
-              <Box sx={dataGridBoxStyle}>
-                <DataGridDemo rows={presentRows} columns={columns} />
-              </Box>
-            </Box>
-          </Grid>
+            </Grid>
 
-          <Grid
-            item
-            xs={12}
-            lg={4}
-            sx={{ mb: "-150px", maxHeight: "1000px", width: "100%" }}
-          >
-            <ServicesMap coordinates={coordinates} />
-          </Grid>
+            <Grid
+              item
+              xs={12}
+              lg={4}
+              sx={{ mb: "-150px", maxHeight: "1000px", width: "100%" }}
+            >
+              <ServicesMap coordinates={coordinates} />
+            </Grid>
 
-          <Grid
-            item
-            xs={12}
-            lg={8}
-            sx={{ marginTop: { xs: "100px", lg: "0px" } }}
-          >
-            <Box sx={gridBoxStyle}>
-              <Box
-                sx={{
-                  p: "10px 0px",
-                  display: "grid",
-                  gridTemplateColumns: "auto 1fr",
-                  alignSelf: "start",
-                }}
-              >
-                <Typography sx={headerTypographyStyle}>
-                  Past Services
-                </Typography>
+            <Grid
+              item
+              xs={12}
+              lg={8}
+              sx={{ marginTop: { xs: "100px", lg: "0px" } }}
+            >
+              <Box sx={gridBoxStyle}>
+                <Box
+                  sx={{
+                    p: "10px 0px",
+                    display: "grid",
+                    gridTemplateColumns: "auto 1fr",
+                    alignSelf: "start",
+                  }}
+                >
+                  <Typography sx={headerTypographyStyle}>
+                    Past Services
+                  </Typography>
+                </Box>
+                <Box sx={dataGridBoxStyle}>
+                  <DataGridDemo rows={pastRows} columns={columns} />
+                </Box>
               </Box>
-              <Box sx={dataGridBoxStyle}>
-                <DataGridDemo rows={pastRows} columns={columns} />
-              </Box>
-            </Box>
+            </Grid>
           </Grid>
-        </Grid>
+        )}
       </Box>
 
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
@@ -338,15 +358,16 @@ function Services() {
         <DialogContent>
           <Calendar
             label="Date"
-            value={editRow?.date || dayjs()} 
+            value={editRow?.date || dayjs()}
             onDateChange={(newValue) => handleEditChange("date", newValue)}
           />
-          <TextField
-            margin="dense"
-            label="Time"
-            fullWidth
-            value={editRow?.time || ""}
-            onChange={(e) => handleEditChange("time", e.target.value)}
+          <Time
+            name="Start Time"
+            onTimeChange={(newValue) => handleEditChange("service_start_time", newValue)}
+          />
+          <Time
+            name="End Time"
+            onTimeChange={(newValue) => handleEditChange("service_end_time", newValue)}
           />
           <TextField
             margin="dense"

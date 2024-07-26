@@ -326,6 +326,7 @@ export default function Business() {
         );
       }
     } else if (editDialogType === "vendor") {
+      console.log(editRow)
       const { id, licence_id, vendor_name, licence_expiry_date, vendor_email, vendor_phone_number } = editRow;
       const updatedData = {
         licence_id,
@@ -461,13 +462,13 @@ export default function Business() {
         <DialogContent>
           {editDialogType === "business" ? (
             <>
-              <TextField
+              {/* <TextField
                 margin="dense"
                 label="Business"
                 fullWidth
                 value={editRow?.business || ""}
                 onChange={(e) => handleEditChange("business", e.target.value)}
-              />
+              /> */}
               <TextField
                 margin="dense"
                 label="Unit Name"
@@ -475,13 +476,13 @@ export default function Business() {
                 value={editRow?.unit_name || ""}
                 onChange={(e) => handleEditChange("unit_name", e.target.value)}
               />
-              <TextField
+              {/* <TextField
                 margin="dense"
                 label="Permit ID"
                 fullWidth
                 value={editRow?.permit_id || ""}
                 onChange={(e) => handleEditChange("permit_id", e.target.value)}
-              />
+              /> */}
               <Calendar
                 label="Permit Expiry Date"
                 value={editRow?.permit_expiry_date || dayjs()} 
@@ -497,13 +498,13 @@ export default function Business() {
             </>
           ) : (
             <>
-              <TextField
+              {/* <TextField
                 margin="dense"
                 label="Business"
                 fullWidth
                 value={editRow?.business || ""}
                 onChange={(e) => handleEditChange("business", e.target.value)}
-              />
+              /> */}
               <TextField
                 margin="dense"
                 label="Vendor Name"
@@ -511,13 +512,13 @@ export default function Business() {
                 value={editRow?.vendor_name || ""}
                 onChange={(e) => handleEditChange("vendor_name", e.target.value)}
               />
-              <TextField
+              {/* <TextField
                 margin="dense"
                 label="Licence ID"
                 fullWidth
                 value={editRow?.licence_id || ""}
                 onChange={(e) => handleEditChange("licence_id", e.target.value)}
-              />
+              /> */}
               <Calendar
                 label="Licence Expiry Date"
                 value={editRow?.licence_expiry_date || dayjs()} 

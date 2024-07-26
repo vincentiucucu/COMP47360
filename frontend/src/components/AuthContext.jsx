@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
     if (isAuthenticated) {
       timer = setTimeout(() => {
         logout()
-      }, 30 * 60 * 1000); 
+      }, 120 * 60 * 1000); 
     }
     return () => clearTimeout(timer);
   }, [isAuthenticated, navigate]);

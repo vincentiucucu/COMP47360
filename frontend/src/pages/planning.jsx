@@ -22,21 +22,24 @@ import PlanningMap from "../components/PlanningMap";
 import Calendar from "../components/Calendar";
 import TimePicker from "../components/Time";
 import CustomToast from "../components/CustomToast";
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 import postService from "../services/postService";
-import getTaxiZones from "../services/getTaxiZones"
+import getTaxiZones from "../services/getTaxiZones";
 import getBusynessScores from "../services/getBusynessScores";
+import getRecommendations from "../services/getRecommendations";
 import getBusinessUnits from "../services/getBusinessUnits";
 import getVendors from "../services/getVendorDetails";
 
 const Planning = () => {
   const [coordinates, setCoordinates] = useState([]);
+  const [zoneRecommendationData, setZoneRecommendationData] = useState([]);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedStartTime, setSelectedStartTime] = useState("");
   const [selectedEndTime, setSelectedEndTime] = useState("");
   const [businessUnit, setBusinessUnit] = useState(null);
   const [authorisedVendors, setAuthorisedVendors] = useState([]);
   const [areas, setAreas] = useState(null);
+  const [zoneID, setZoneID] = useState(null);
   const [locationCords, setLocationCords] = useState(null);
   const [taxiZones, setTaxiZones] = useState(null);
   const [businessUnits, setBusinessUnits] = useState([]);
@@ -49,58 +52,102 @@ const Planning = () => {
 
   const handleClick = async () => {
     if (!selectedDate || !selectedStartTime || !selectedEndTime || !businessUnit || !authorisedVendors.length || !areas || !address) {
-      let missingField = '';
-      if (!selectedDate) missingField = 'Date';
-      else if (!selectedStartTime) missingField = 'Start Time';
-      else if (!selectedEndTime) missingField = 'End Time';
-      else if (!businessUnit) missingField = 'Business Unit';
-      else if (!authorisedVendors.length) missingField = 'Authorised Vendors';
-      else if (!areas) missingField = 'Area';
-      else if (!address) missingField = 'Address';
+      let missingField = "";
+      if (!selectedDate) missingField = "Date";
+      else if (!selectedStartTime) missingField = "Start Time";
+      else if (!selectedEndTime) missingField = "End Time";
+      else if (!businessUnit) missingField = "Business Unit";
+      else if (!authorisedVendors.length) missingField = "Authorised Vendors";
+      else if (!areas) missingField = "Area";
+      else if (!address) missingField = "Address";
 
-      toast(<CustomToast header="WARNING" text={`Please enter ${missingField}`}/>);
+      if(missingField == "Address")
+      {
+        toast(<CustomToast header="ALERT" text={`Please select a marker to set your Address`} />);
+        return;
+      }
+      toast(<CustomToast header="WARNING" text={`Please enter ${missingField}`} />);
+      return;
+    }
+
+    const startHour = selectedStartTime.hour();
+    const endHour = selectedEndTime.hour();
+
+    if ((startHour >= 1 && startHour < 4) || (endHour >= 1 && endHour < 4)) {
+      setSelectedStartTime("");
+      setSelectedEndTime("");
+      toast(<CustomToast header="WARNING" text="Early morning services are not available." />);
+      return;
+    }
+
+    if (selectedStartTime.isAfter(selectedEndTime)) {
+      setSelectedStartTime("");
+      setSelectedEndTime("");
+      toast(<CustomToast header="WARNING" text="Start Time cannot be greater than End Time." />);
       return;
     }
 
     if (!locationCords) {
-      toast(<CustomToast header="WARNING" text="Please select location on the map"/>);
+      toast(<CustomToast header="WARNING" text="Please select location on the map" />);
       return;
     }
 
     const formData = {
-      unit: businessUnits.find((business)=> business.unit_name === businessUnit)?.permit_id ,
-      vendors: vendors.filter(vendor => authorisedVendors.includes(vendor.vendor_name)).map(vendor => vendor.licence_id) ,
+      unit: businessUnits.find((business) => business.unit_name === businessUnit)?.permit_id,
+      vendors: vendors.filter((vendor) => authorisedVendors.includes(vendor.vendor_name)).map((vendor) => vendor.licence_id),
       service_date: selectedDate.format("YYYY-MM-DD"),
       service_start_time: selectedStartTime.format("HH:mm:ss"),
       service_end_time: selectedEndTime.format("HH:mm:ss"),
       location_coords: `SRID=4326;POINT(${locationCords.lng} ${locationCords.lat})`,
       location_address: areas,
-      revenue: '-25',
+      revenue: "-25",
     };
-    
+
     try {
       const result = await postService(formData);
       if (result) {
         navigate("/services", { state: { formData } });
       } else {
-        toast(<CustomToast header="ERROR" text="Failed to create service. Please try again."/>);
+        toast(<CustomToast header="ERROR" text="Failed to create service. Please try again." />);
       }
     } catch (error) {
-      toast(<CustomToast header="ERROR" text="An error occurred while creating the service. Please try again"/>);
+      toast(<CustomToast header="ERROR" text="An error occurred while creating the service. Please try again" />);
     }
   };
 
   function logout() {
     localStorage.clear();
-    navigate('/login');
+    navigate("/login");
   }
 
   const handleStartTimeChange = (time) => {
+    const hour = time.hour();
+    if (hour >= 1 && hour < 4) {
+      setSelectedStartTime("");
+      toast(<CustomToast header="WARNING" text="Early morning services are not available." />);
+      return;
+    }
     setSelectedStartTime(time);
+    if (selectedEndTime && time.isAfter(selectedEndTime)) {
+      setSelectedStartTime("");
+      setSelectedEndTime("");
+      toast(<CustomToast header="WARNING" text="Start Time cannot be greater than End Time." />);
+    }
   };
 
   const handleEndTimeChange = (time) => {
+    const hour = time.hour();
+    if (hour >= 1 && hour < 4) {
+      setSelectedEndTime("");
+      toast(<CustomToast header="WARNING" text="Early morning services are not available." />);
+      return;
+    }
     setSelectedEndTime(time);
+    if (selectedStartTime && selectedStartTime.isAfter(time)) {
+      setSelectedStartTime("");
+      setSelectedEndTime("");
+      toast(<CustomToast header="WARNING" text="Start Time cannot be greater than End Time." />);
+    }
   };
 
   const handleDateChange = (date) => {
@@ -120,7 +167,7 @@ const Planning = () => {
         const vendors = await getVendors();
         setVendors(vendors);
       } catch (error) {
-        toast(<CustomToast header="WARNING" text="Failed to fetch vendors and business data. Please try again."/>);
+        toast(<CustomToast header="WARNING" text="Failed to fetch vendors and business data. Please try again." />);
       } finally {
         setLoading(false);
       }
@@ -138,8 +185,9 @@ const Planning = () => {
       try {
         const formattedDate = selectedDate.format("YYYY-MM-DD");
         const formattedStartTime = selectedStartTime.format("HH:mm:ss");
-        
-        const response = await getBusynessScores(formattedDate, formattedStartTime);
+        const formattedEndTime = selectedEndTime.format("HH:mm:ss");
+
+        const response = await getBusynessScores(formattedDate, formattedStartTime, formattedEndTime);
         let data = response.data;
         if (typeof data === "string") {
           data = JSON.parse(data);
@@ -152,7 +200,7 @@ const Planning = () => {
         }));
         setCoordinates(filteredData);
       } catch (error) {
-        toast(<CustomToast header="WARNING" text="Failed to fetch busyness scores. Please try again."/>);
+        toast(<CustomToast header="WARNING" text="Failed to fetch busyness scores. Please try again." />);
       } finally {
         setLoading(false);
       }
@@ -161,11 +209,46 @@ const Planning = () => {
     fetchData();
   }, [selectedDate, selectedStartTime, selectedEndTime]);
 
-  const handleSelectedZone = (zone_id) => 
-    {
-      const area = taxiZones.features.find((zone) => zone.geometry.zone_id === zone_id)?.geometry.zone;
-      setAreas(area)
-    }
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!selectedDate || !selectedStartTime || !selectedEndTime || !zoneID) {
+        return;
+      }
+
+      setLoading(true);
+      try {
+        const formattedDate = selectedDate.format("YYYY-MM-DD");
+        const formattedStartTime = selectedStartTime.format("HH:mm:ss");
+        const formattedEndTime = selectedEndTime.format("HH:mm:ss");
+
+        const response = await getRecommendations(formattedDate, formattedStartTime, formattedEndTime, zoneID, 20);
+        let data = JSON.parse(response);
+        const features = data.features;
+        const filteredData = features.map((item) => ({
+          geometry: item.geometry,
+          properties: item.properties, 
+        }));
+        setZoneRecommendationData(filteredData);
+      } catch (error) {
+        toast(<CustomToast header="WARNING" text="Failed to fetch recommendations. Please try again." />);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [selectedDate, selectedStartTime, selectedEndTime, zoneID]);
+
+  const handleSelectedZone = (zoneId) => {
+    console.log(zoneId);
+    const area = taxiZones.features.find((zone) => zone.geometry.zone_id === zoneId)?.geometry.zone;
+    setAreas(area);
+    setZoneID(zoneId);
+  };
+
+  const handleMarkerClick = (address) => {
+    setAddress(address);
+  };
 
   const formContainerStyle = {
     top: "75px",
@@ -215,7 +298,7 @@ const Planning = () => {
     position: "absolute",
     top: 0,
     left: 0,
-    zIndex: -1, 
+    zIndex: -1,
   };
 
   return (
@@ -224,29 +307,33 @@ const Planning = () => {
       <Box sx={mapContainerStyle}>
         <PlanningMap
           initialHeatMapCor={coordinates}
+          zoneRecommendationData={zoneRecommendationData}
           taxiZoneData={taxiZones}
           selectedZone={selectedZone}
           selectedCord={locationCords}
           setSelectedCord={setLocationCords}
           handleSelectedZone={handleSelectedZone}
+          onMarkerClick={handleMarkerClick} 
         />
       </Box>
 
       <Box sx={formContainerStyle}>
         {loading && (
-          <Box sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(255, 255, 255, 0.7)',
-            zIndex: 1000,
-            borderRadius: '20px'
-          }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(255, 255, 255, 0.7)",
+              zIndex: 1000,
+              borderRadius: "20px",
+            }}
+          >
             <CircularProgress />
           </Box>
         )}
@@ -371,10 +458,7 @@ const Planning = () => {
       </Box>
 
       {!showPlanningBox && (
-        <IconButton
-          sx={toggleButtonStyle}
-          onClick={() => setShowPlanningBox(true)}
-        >
+        <IconButton sx={toggleButtonStyle} onClick={() => setShowPlanningBox(true)}>
           <ArrowForward />
         </IconButton>
       )}

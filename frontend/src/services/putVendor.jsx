@@ -1,8 +1,10 @@
 import api from '../api';
 
-const putBusinessUnit = async (id, updatedData) => {
+const putVendor = async (id, updatedData) => {
   try {
-    const response = await api.put(`/api/vendor/${id}/`, updatedData);
+    console.log(updatedData)
+
+    const response = await api.put(`/api/vendors/${id}/`, updatedData);
     console.log(response)
     return response.data;
   } catch (error) {
@@ -11,4 +13,4 @@ const putBusinessUnit = async (id, updatedData) => {
   }
 };
 
-export default putBusinessUnit;
+export default putVendor;

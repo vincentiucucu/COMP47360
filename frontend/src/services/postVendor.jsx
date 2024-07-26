@@ -11,8 +11,9 @@ export const postVendor = async (newVendor) => {
       vendor_phone_number,
     };
   
+    console.log(cleanedVendorUnits)
     try {
-      const response = await api.post('/api/vendor/', cleanedVendorUnits);
+      const response = await api.post('/api/vendors/', cleanedVendorUnits);
       return response.data;
     } catch (error) {
       console.error('Error adding vendor:', error);

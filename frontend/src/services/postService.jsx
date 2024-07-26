@@ -3,7 +3,7 @@ import api from '../api';
 const postService = async (formData) => {
   try {
     console.log("Sending data to API:", formData);
-    const response = await api.post("/api/service/", formData);
+    const response = await api.post("/api/services/", formData);
     if (response.status === 201) {
       return response.data;
     } else {

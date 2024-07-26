@@ -11,7 +11,7 @@ export const postBusinessUnit = async (newBusinessUnit) => {
   };
 
   try {
-    const response = await api.post('/api/business_unit/', cleanedBusinessUnit);
+    const response = await api.post('/api/business_units/', cleanedBusinessUnit);
     console.log(response)
     return response.data;
   } catch (error) {

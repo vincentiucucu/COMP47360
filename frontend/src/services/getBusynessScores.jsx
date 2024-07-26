@@ -1,8 +1,8 @@
 import api from "../api";
 
-const getBusynessScores = async (date, time) => {
+const getBusynessScores = async (date, start, end) => {
   try {
-    const route = `/get_busyness_scores/?datetime=${date}%20${time}`;
+    const route = `/api/busyness_estimates/?date=${date}&service_start_time=${start}&service_end_time=${end}`;
     const response = await api.get(route);
     return response;
   } catch (error) {
