@@ -3,8 +3,8 @@ from rest_framework.viewsets import ModelViewSet
 from app01.models import Event
 from app01.serializers import EventSerializer
 from rest_framework.filters import OrderingFilter, SearchFilter
-from app01.views.pagination import Pagination
-from app01.views.filters import EventFilter
+from app01.pagination import Pagination
+from app01.filters import EventFilter
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.utils.timezone import now

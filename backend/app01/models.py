@@ -156,6 +156,7 @@ class ZoneBusynessScore(models.Model):
     class Meta:
         db_table = 'zones_busyness_score'
 
+
 class StreetBusynessScore(models.Model):
     zoned_street_centroid = models.PointField()
     hour = models.DateTimeField()
