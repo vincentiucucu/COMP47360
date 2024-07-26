@@ -30,7 +30,7 @@ import getServices from "../services/getServices";
 import deleteService from "../services/deleteService";
 import putService from "../services/putService";
 
-function Services() {
+const Services = () => {
   const [pastRows, setPastRows] = useState([]);
   const [presentRows, setPresentRows] = useState([]);
   const [coordinates, setCoordinates] = useState([]);
@@ -98,7 +98,12 @@ function Services() {
 
   const handleEditClick = (row) => {
     const [startTime, endTime] = row.time.split(" - ");
-    setEditRow({ ...row, date: dayjs(row.date), service_start_time: dayjs(startTime, "HH:mm:ss"), service_end_time: dayjs(endTime, "HH:mm:ss") });
+    setEditRow({
+      ...row,
+      date: dayjs(row.date),
+      service_start_time: dayjs(startTime, "HH:mm:ss"),
+      service_end_time: dayjs(endTime, "HH:mm:ss"),
+    });
     setEditDialogOpen(true);
   };
 
@@ -123,7 +128,7 @@ function Services() {
       vendors_id,
       address,
       location,
-      time
+      time,
     } = editRow;
 
     const updatedData = {
@@ -187,6 +192,13 @@ function Services() {
     },
   ];
 
+  const headerTypographyStyle = {
+    color: "black",
+    fontSize: "25px",
+    alignContent: "center",
+    pr: "10px",
+  };
+
   const buttonStyles = {
     textTransform: "none",
     backgroundColor: "#F6F6F6",
@@ -214,18 +226,6 @@ function Services() {
     },
   };
 
-  function logout() {
-    localStorage.clear();
-    navigate("/login");
-  }
-
-  const headerTypographyStyle = {
-    color: "black",
-    fontSize: "25px",
-    alignContent: "center",
-    pr: "10px",
-  };
-
   const gridBoxStyle = {
     display: "flex",
     flexDirection: "column",
@@ -240,13 +240,42 @@ function Services() {
     minWidth: 750,
   };
 
+  const dialogBoxStyle = {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
+    zIndex: 1000,
+    borderRadius: "20px",
+  };
+
+  const pageBoxStyle = {
+    display: "grid",
+    gridTemplateRows: "auto 1fr",
+  };
+
+  const contentBoxStyle = {
+    flexGrow: 1,
+    paddingLeft: "20px",
+    mt: "64px",
+    height: "80vh",
+  };
+
+  function logout() {
+    localStorage.clear();
+    navigate("/login");
+  }
+
   return (
-    <Box sx={{ display: "grid", gridTemplateRows: "auto 1fr" }}>
+    <Box sx={pageBoxStyle}>
       <AppBar logout={logout} />
 
-      <Box
-        sx={{ flexGrow: 1, paddingLeft: "20px", mt: "64px", height: "80vh" }}
-      >
+      <Box sx={contentBoxStyle}>
         <Box className="headertitle">
           <Typography
             sx={{ color: "black", fontSize: "35px", fontWeight: "500" }}
@@ -256,14 +285,7 @@ function Services() {
         </Box>
 
         {loading ? (
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "100%",
-            }}
-          >
+          <Box sx={dialogBoxStyle}>
             <CircularProgress />
           </Box>
         ) : (
@@ -363,11 +385,15 @@ function Services() {
           />
           <Time
             name="Start Time"
-            onTimeChange={(newValue) => handleEditChange("service_start_time", newValue)}
+            onTimeChange={(newValue) =>
+              handleEditChange("service_start_time", newValue)
+            }
           />
           <Time
             name="End Time"
-            onTimeChange={(newValue) => handleEditChange("service_end_time", newValue)}
+            onTimeChange={(newValue) =>
+              handleEditChange("service_end_time", newValue)
+            }
           />
           <TextField
             margin="dense"
@@ -388,6 +414,6 @@ function Services() {
       </Dialog>
     </Box>
   );
-}
+};
 
 export default Services;

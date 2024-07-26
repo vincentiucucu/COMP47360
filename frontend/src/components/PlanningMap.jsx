@@ -39,7 +39,7 @@ const MapClickHandler = ({ csvGeoJsonData, setLayersCleared, setHoverEnabled, ha
 
       if (closestFeature) {
         const [centerLng, centerLat] = closestFeature.geometry.center_cor;
-        map.setView([centerLat, centerLng], 18);
+        map.setView([centerLat, centerLng], 16);
         handleSelectedZone(closestFeature.geometry.zone_id);
         console.log(`Zone: ${closestFeature.geometry.zone}, Zone ID: ${closestFeature.geometry.zone_id}`);
       }
@@ -92,6 +92,7 @@ const PlanningMap = ({ initialHeatMapCor, zoneRecommendationData, taxiZoneData, 
   const [hoverEnabled, setHoverEnabled] = useState(true);
   const [selectedCord, setSelectedCordState] = useState(initialSelectedCord || null);
   const [address, setAddress] = useState("");
+  const [selectedMarker, setSelectedMarker] = useState(null); // New state to track selected marker
   const mapRef = useRef(null);
   console.log(zoneRecommendationData);
 
@@ -185,11 +186,6 @@ const PlanningMap = ({ initialHeatMapCor, zoneRecommendationData, taxiZoneData, 
         }}
         setAddress={setAddress}
       />
-      {/* {selectedCord && (
-        <Marker position={[selectedCord.lat, selectedCord.lng]}>
-          <Popup>{address}</Popup>
-        </Marker>
-      )} */}
       {zoneRecommendationData &&
         zoneRecommendationData.length > 0 &&
         zoneRecommendationData.map((item, index) => (
@@ -200,11 +196,24 @@ const PlanningMap = ({ initialHeatMapCor, zoneRecommendationData, taxiZoneData, 
               click: () => {
                 onMarkerClick(item.properties.street_address);
                 setAddress(item.properties.street_address);
+                setSelectedMarker(index); // Set the selected marker index
               },
             }}
             icon={L.divIcon({
               className: "custom-marker",
-              html: `<div style="background-color: #FF6347; width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold;">${item.properties.score.toFixed(2)}</div>`,
+              html: `<div style="
+                background-color: ${selectedMarker === index ? '#32CD32' : '#FF6347'};
+                width: ${selectedMarker === index ? '35px' : '30px'};
+                height: ${selectedMarker === index ? '35px' : '30px'};
+                border-radius: 50%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                color: white;
+                font-weight: bold;
+                box-shadow: ${selectedMarker === index ? '0 0 15px rgba(0,0,0,0.5)' : 'none'};
+                transform: ${selectedMarker === index ? 'scale(1.05)' : 'scale(1)'};
+              ">${item.properties.score.toFixed(2)}</div>`,
             })}
           >
             <Popup>
