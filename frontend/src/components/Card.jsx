@@ -1,6 +1,5 @@
 import React from "react";
 import { Box, Typography, Grid, CardMedia } from "@mui/material";
-import Card from "@mui/material/Card";
 import { styled } from "@mui/system";
 
 const StyledBox = styled(Box)({

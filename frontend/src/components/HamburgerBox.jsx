@@ -3,7 +3,7 @@ import Box from "@mui/material/Box";
 import AppBarBox from './AppBarGrid'
 import SideDrawer from './SideDrawer'
 
-export default function HamburgerBox() {
+export default function HamburgerBox({logout}) {
   
   const [isDrawerOpen, setDrawerOpen] = useState(false);
 
@@ -17,7 +17,7 @@ export default function HamburgerBox() {
 
   return (
     <Box>
-      <AppBarBox toggleDrawer={toggleDrawer} />
+      <AppBarBox toggleDrawer={toggleDrawer} logout={logout}/>
       <SideDrawer isOpen={isDrawerOpen} toggleDrawer={toggleDrawer} />
     </Box>
   );

@@ -1,12 +1,19 @@
-import api from "../api";
+import api from '../api';
 
-export const postService = async (servicesModel) => {
-  const route = "/api/signup";
+const postService = async (formData) => {
   try {
-    const response = await api.post(route, { servicesModel });
-    return response;
+    console.log("Sending data to API:", formData);
+    const response = await api.post("/api/services/", formData);
+    if (response.status === 201) {
+      return response.data;
+    } else {
+      console.error("Error creating service:", response.status, response.data);
+      return null;
+    }
   } catch (error) {
-    console.error("Error registering user:", error);
-    throw error;
+    console.error("Error creating service:", error.response ? error.response.data : error.message);
+    return null;
   }
 };
+
+export default postService;
