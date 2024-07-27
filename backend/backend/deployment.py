@@ -5,7 +5,7 @@ from .settings import BASE_DIR
 ALLOWED_HOSTS = [os.environ['WEBSITE_HOSTNAME']]
 CSRF_TRUSTED_ORIGINS = ['https://'+os.environ['WEBSITE_HOSTNAME']]
 DEBUG = False
-SECRET_KEY = os.environ['SECRET_KEY']
+SECRET_KEY = os.environ['DJANGO_KEY']
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -37,8 +37,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': CONNECTION_STR['dbname'],
-        'USER': CONNECTION_STR['prod_user'],
-        'PASSWORD': CONNECTION_STR['prod_user_pwd'],
+        'USER': CONNECTION_STR['user'],
+        'PASSWORD': CONNECTION_STR['password'],
+        'PORT': CONNECTION_STR['port'],
         'HOST': CONNECTION_STR['host'],
         'OPTIONS': {
             'sslmode': 'require',
