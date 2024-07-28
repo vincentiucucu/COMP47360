@@ -22,24 +22,28 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y binutils libproj-dev gdal-bin libgdal-dev
+
       - name: Create and start virtual environment
         run: |
           cd backend
           python -m venv venv
           source venv/bin/activate
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y binutils libproj-dev gdal-bin libgdal-dev
       
       - name: Install dependencies
         run: |
+          cd backend
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Collect static files
-        run: python manage.py collectstatic --noinput
+        run: |
+          cd backend
+          source venv/bin/activate
+          python manage.py collectstatic --noinput
         
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
