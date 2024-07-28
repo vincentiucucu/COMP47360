@@ -36,7 +36,7 @@ CONNECTION_STR = {pair.split('=')[0]:pair.split('=')[1] for pair in CONNECTION.s
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': CONNECTION_STR['dbname'],
+        'NAME': CONNECTION_STR['database'],
         'USER': CONNECTION_STR['user'],
         'PASSWORD': CONNECTION_STR['password'],
         'PORT': CONNECTION_STR['port'],
