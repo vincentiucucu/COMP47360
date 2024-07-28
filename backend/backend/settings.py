@@ -114,31 +114,6 @@ DATABASES = {
     }
 }
 
-# Config and start the SSH tunnel
-'''
-ssh_tunnel = SSHTunnelForwarder (
-    (os.environ.get('SERVER_IP'), int(os.environ.get('SSH_PORT'))),
-    ssh_username=os.environ.get('SSH_USERNAME'),
-    ssh_password=os.environ.get('SSH_PWD'),
-    remote_bind_address=('localhost', int(os.environ.get('LOCAL_DB_PORT_ON_SERVER'))),
-)
-ssh_tunnel.start()
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': os.environ.get('DB_NAME'),
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PWD'),
-        'HOST': 'localhost',
-        'PORT': ssh_tunnel.local_bind_port,
-        'OPTIONS': {
-            'options': '-c search_path=vendtune' # if no schema is specified, always search in vendtune schema
-        }
-    }
-}
-'''
-
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
