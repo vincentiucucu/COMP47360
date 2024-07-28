@@ -48,4 +48,4 @@ DATABASES = {
     }
 }
 
-STATIC_URL_ROOT = BASE_DIR/'staticfiles'
+STATIC_ROOT = BASE_DIR/'staticfiles'
