@@ -128,8 +128,8 @@ const Main = () => {
                 },
               }}
             >
-              A Data-Driven Approach to Managing Your Mobile Food Vending
-              Business
+              {import.meta.env.MODE} A Data-Driven Approach to Managing Your Mobile Food Vending
+              Business {import.meta.env.VITE_API_URL_PROD} {import.meta.env.VITE_API_URL_LOCAL}
             </Typography>
           </Grid>
           <Grid sx={{alignContent:'center'}} item xs={12} md={4}>
