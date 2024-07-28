@@ -20,7 +20,7 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "wonderful-field-058c1e003.5.azurestaticapps.net"
+    "https://wonderful-field-058c1e003.5.azurestaticapps.net"
 ]
 
 STORAGES = {
